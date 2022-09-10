@@ -28,7 +28,7 @@ public class Post extends Timestamped{
 
     @ElementCollection
     @CollectionTable(name="imgUrl")
-    private ArrayList<String> imgUrl;
+    private List<String> imgUrl = new ArrayList<>();
 
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
