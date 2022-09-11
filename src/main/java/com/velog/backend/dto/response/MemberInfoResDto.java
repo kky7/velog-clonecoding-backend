@@ -1,6 +1,5 @@
 package com.velog.backend.dto.response;
 
-import com.velog.backend.dto.request.SignupReqDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,11 +10,15 @@ public class MemberInfoResDto {
     private String email;
     private String nickname;
     private String introduction;
+    private String profileUrl;
+    private String velogTitle;
 
-    public MemberInfoResDto(Long memberId, SignupReqDto signupReqDto){
+    public MemberInfoResDto(Long memberId, String email, String nickname, String introduction, String profileUrl, String velogTitle){
         this.memberId = memberId;
-        this.email = signupReqDto.getEmail();
-        this.nickname = signupReqDto.getNickname();
-        this.introduction = signupReqDto.getIntroduction();
+        this.email = email;
+        this.nickname = nickname;
+        this.introduction = introduction;
+        this.profileUrl = profileUrl;
+        this.velogTitle = velogTitle;
     }
 }
