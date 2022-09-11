@@ -1,16 +1,13 @@
 package com.velog.backend.entity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.velog.backend.dto.request.SignupReqDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Member {
     @Id
@@ -29,11 +26,18 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    // 일반회원가입은 회원가입시 지정, 카카오 로그인은...?
+    // 일반회원가입은 회원가입시 지정, 카카오 로그인은 초기값 null
     @Column
     private String introduction;
 
     // 일반회원가입시 null, 카카오 로그인은 카카오 아이디
     @Column
     private String kakaoId;
+
+    public Member(SignupReqDto signupReqDto){
+        this.email = signupReqDto.getEmail();
+        this.nickname = signupReqDto.getNickname();
+        this.password = signupReqDto.getPassword();
+        this.introduction = signupReqDto.getIntroduction();
+    }
 }
