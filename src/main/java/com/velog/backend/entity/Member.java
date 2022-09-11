@@ -1,8 +1,8 @@
 package com.velog.backend.entity;
 import com.velog.backend.dto.request.SignupReqDto;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 
@@ -34,10 +34,21 @@ public class Member {
     @Column
     private String kakaoId;
 
-    public Member(SignupReqDto signupReqDto){
+    @Column
+    private String profileUrl;
+
+    @Column
+    private String velogTitle;
+
+    public boolean validatePassword(PasswordEncoder passwordEncoder, String password) {
+        return passwordEncoder.matches(password, this.password);
+    }
+
+    public Member(SignupReqDto signupReqDto, String velogTitle){
         this.email = signupReqDto.getEmail();
         this.nickname = signupReqDto.getNickname();
         this.password = signupReqDto.getPassword();
         this.introduction = signupReqDto.getIntroduction();
+        this.velogTitle = velogTitle;
     }
 }

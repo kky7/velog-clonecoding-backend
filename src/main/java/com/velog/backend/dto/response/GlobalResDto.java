@@ -15,4 +15,9 @@ public class GlobalResDto<T> {
         this.msg = msg;
         this.data = data;
     }
+
+    public GlobalResDto(HttpStatus httpStatus, String msg){
+        this.status = httpStatus.toString();
+        this.msg = msg;
+    }
 }
