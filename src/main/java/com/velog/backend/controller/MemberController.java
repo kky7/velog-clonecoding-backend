@@ -1,9 +1,11 @@
 package com.velog.backend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.velog.backend.dto.request.EmailReqDto;
 import com.velog.backend.dto.request.LoginReqDto;
 import com.velog.backend.dto.request.SignupReqDto;
 import com.velog.backend.security.user.UserDetailsImpl;
+import com.velog.backend.service.KakaoService;
 import com.velog.backend.service.MemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import javax.validation.Valid;
 @AllArgsConstructor
 public class MemberController {
     private final MemberService memberService;
+    private final KakaoService kakaoService;
 
     // 이메일 중복체크
     @PostMapping("/member/email")
@@ -50,9 +53,15 @@ public class MemberController {
     }
     
     // 프로필 사진 요청
-    // reissue
     @GetMapping("/auth/member/profile-img")
     public ResponseEntity<?> getProfileUrl(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return memberService.getProfileUrl(userDetails);
+    }
+
+    // 카카오 로그인
+    @GetMapping("/member/login/kakao")
+    public ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
+        // code: 카카오 서버로부터 받은 인가 코드 - 클라이언트가 카카오 서버로 부터 받아서 백으로 보내줌
+        return kakaoService.kakaoLogin(code, response);
     }
 }

@@ -97,8 +97,8 @@ public class MemberService {
         String nickname = member.getNickname();
 
         // 토큰 발급
-        String accessToken = jwtUtil.createToken(email, nickname, TokenProperties.AUTH_HEADER);
-        String refreshToken = jwtUtil.createToken(email, nickname, TokenProperties.REFRESH_HEADER);
+        String accessToken = jwtUtil.createToken(nickname, TokenProperties.AUTH_HEADER);
+        String refreshToken = jwtUtil.createToken(nickname, TokenProperties.REFRESH_HEADER);
 
         RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
 
@@ -196,15 +196,15 @@ public class MemberService {
             case TokenProperties.EXPIRED:
                 return dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.EXPIRED_REFRESH_TOKEN);
             case TokenProperties.VALID:
-                String email = jwtUtil.getEmailFromToken(refreshToken);
-                Member member = isPresentMemberByEmail(email);
+                String nickname = jwtUtil.getNicknameFromToken(refreshToken);
+                Member member = isPresentMemberByNickname(nickname);
 
                 if (member == null) {
                     return dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_FOUND);
                 } else {
                     RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
                     if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
-                        String newAccessToken = jwtUtil.createToken(email, member.getNickname(), TokenProperties.AUTH_HEADER);
+                        String newAccessToken = jwtUtil.createToken(member.getNickname(), TokenProperties.AUTH_HEADER);
                         response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + newAccessToken);
                         return dataNullResponse(HttpStatus.OK,SuccessMsg.REISSUE_ACCESS_TOKEN);
                     } else {
