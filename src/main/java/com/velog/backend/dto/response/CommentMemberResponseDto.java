@@ -16,6 +16,6 @@ public class CommentMemberResponseDto {
     public CommentMemberResponseDto(Member member) {
         this.memberId = member.getMemberId();
         this.nickname = member.getNickname();
-        this.profileUrl = member.getPorfileUrl();
+        this.profileUrl = member.getProfileUrl();
     }
 }
