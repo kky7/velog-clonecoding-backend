@@ -54,15 +54,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 case TokenProperties.VALID:
                     // JWT 로부터 권한 값 가져오기
-                    String email = jwtUtil.getEmailFromToken(accessToken);
+                    String nickname = jwtUtil.getNicknameFromToken(accessToken);
 
-                    if (email == null) {
+                    if (nickname == null) {
                         jwtUtil.exceptionResponse(response, HttpStatus.FORBIDDEN, ErrorMsg.INVALID_ACCESS_TOKEN);
                         return;
                     }
 
                     // JWT 검증 성공 -> 권한 값으로부터 유저를 가져온다
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(nickname);
 
                     if (userDetails == null) {
                         jwtUtil.exceptionResponse(response, HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_FOUND);
