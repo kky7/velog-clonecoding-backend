@@ -6,6 +6,7 @@ import com.velog.backend.dto.request.EmailReqDto;
 import com.velog.backend.dto.request.LoginReqDto;
 import com.velog.backend.dto.request.SignupReqDto;
 import com.velog.backend.dto.response.GlobalResDto;
+import com.velog.backend.dto.response.ImgUrlResDto;
 import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.RefreshToken;
@@ -88,13 +89,16 @@ public class MemberService {
             return dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.EMAIL_NOT_FOUND);
         }
 
+
         if(!member.validatePassword(passwordEncoder,loginReqDto.getPassword())){
             return dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_PASSWORD);
         }
-        
+
+        String nickname = member.getNickname();
+
         // 토큰 발급
-        String accessToken = jwtUtil.createToken(email, TokenProperties.AUTH_HEADER);
-        String refreshToken = jwtUtil.createToken(email, TokenProperties.REFRESH_HEADER);
+        String accessToken = jwtUtil.createToken(email, nickname, TokenProperties.AUTH_HEADER);
+        String refreshToken = jwtUtil.createToken(email, nickname, TokenProperties.REFRESH_HEADER);
 
         RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
 
@@ -110,7 +114,7 @@ public class MemberService {
         // 응답 헤더에 토큰 담아서 보내기
         TokenToHeaders(response, accessToken, refreshToken);
 
-        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(),email, member.getNickname(), member.getIntroduction(), member.getProfileUrl(), member.getVelogTitle());
+        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(),email, nickname, member.getIntroduction(), member.getProfileUrl(), member.getVelogTitle());
 
 
         GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.LOGIN_SUCCESS,memberInfoResDto);
@@ -200,7 +204,7 @@ public class MemberService {
                 } else {
                     RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
                     if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
-                        String newAccessToken = jwtUtil.createToken(email, TokenProperties.AUTH_HEADER);
+                        String newAccessToken = jwtUtil.createToken(email, member.getNickname(), TokenProperties.AUTH_HEADER);
                         response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + newAccessToken);
                         return dataNullResponse(HttpStatus.OK,SuccessMsg.REISSUE_ACCESS_TOKEN);
                     } else {
@@ -210,6 +214,14 @@ public class MemberService {
             default:
                 return dataNullResponse(HttpStatus.FORBIDDEN,ErrorMsg.INVALID_REFRESH_TOKEN);
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> getProfileUrl(UserDetailsImpl userDetails){
+        String profileUrl = userDetails.getMember().getProfileUrl();
+
+        GlobalResDto<ImgUrlResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.PROFILEURL_SUCCESS,new ImgUrlResDto(profileUrl));
+        return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 
     @Transactional(readOnly = true)
