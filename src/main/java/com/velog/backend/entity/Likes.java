@@ -6,20 +6,27 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Getter
-@NoArgsConstructor
+
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
 @Entity
 public class Likes {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long likesId;
 
-    @JoinColumn(name = "memberId", nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long likeId;
+
+    // 사용자 정보
+    @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @JoinColumn(name = "postId", nullable = false)
+    // 좋아요 할 게시글
+    @JoinColumn(name = "post_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
+
+
+
 }
