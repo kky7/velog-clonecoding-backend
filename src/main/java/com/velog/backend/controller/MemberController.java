@@ -50,4 +50,11 @@ public class MemberController {
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         return memberService.reissue(request,response);
     }
+    
+    // 프로필 사진 요청
+    // reissue
+    @PostMapping("/auth/member/profile-img")
+    public ResponseEntity<?> getProfileUrl(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return memberService.getProfileUrl(userDetails);
+    }
 }

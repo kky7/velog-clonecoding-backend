@@ -42,13 +42,14 @@ public class JwtUtil {
 
 
     // 토큰 생성
-    public String createToken(String email, String type){
+    public String createToken(String email, String nickname, String type){
         Date date = new Date();
         int time = type.equals(TokenProperties.AUTH_HEADER)? TokenProperties.ACCESS_TOKEN_VALID_TIME : TokenProperties.REFRESH_TOKEN_VALID_TIME;
 
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(date)
+                .claim("nickname", nickname)
                 .setExpiration(new Date(System.currentTimeMillis() + time))
                 .signWith(key,signatureAlgorithm)
                 .compact();
