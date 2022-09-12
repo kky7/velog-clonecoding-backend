@@ -8,9 +8,7 @@ import com.velog.backend.service.MemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +51,7 @@ public class MemberController {
     
     // 프로필 사진 요청
     // reissue
-    @PostMapping("/auth/member/profile-img")
+    @GetMapping("/auth/member/profile-img")
     public ResponseEntity<?> getProfileUrl(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return memberService.getProfileUrl(userDetails);
     }
