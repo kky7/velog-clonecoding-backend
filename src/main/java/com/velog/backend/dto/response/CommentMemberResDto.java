@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-public class CommentMemberResponseDto {
+public class CommentMemberResDto {
 
     private Long memberId;
     private String nickname;
     private String profileUrl;
 
 
-    public CommentMemberResponseDto(Member member) {
+    public CommentMemberResDto(Member member) {
         this.memberId = member.getMemberId();
         this.nickname = member.getNickname();
         this.profileUrl = member.getProfileUrl();

@@ -8,20 +8,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class CommentResponseDto {
+public class CommentResDto {
 
     private Long commentId;
     private Long postId;
     private String content;
     private String date;
-    private CommentMemberResponseDto responseDto;
+    private CommentMemberResDto responseDto;
 
-    public CommentResponseDto (Comment comment) {
+    public CommentResDto(Comment comment) {
         this.commentId = comment.getCommentId();
         this.postId = comment.getPost().getPostId();
         this.content = comment.getContent();
         this.date = String.valueOf(comment.getCreatedAt());
-        this.responseDto = new CommentMemberResponseDto(comment.getMember());
+        this.responseDto = new CommentMemberResDto(comment.getMember());
 
 
     }
