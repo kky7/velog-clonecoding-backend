@@ -42,14 +42,13 @@ public class JwtUtil {
 
 
     // 토큰 생성
-    public String createToken(String email, String nickname, String type){
+    public String createToken(String nickname, String type){
         Date date = new Date();
         int time = type.equals(TokenProperties.AUTH_HEADER)? TokenProperties.ACCESS_TOKEN_VALID_TIME : TokenProperties.REFRESH_TOKEN_VALID_TIME;
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(nickname)
                 .setIssuedAt(date)
-                .claim("nickname", nickname)
                 .setExpiration(new Date(System.currentTimeMillis() + time))
                 .signWith(key,signatureAlgorithm)
                 .compact();
@@ -83,8 +82,8 @@ public class JwtUtil {
         return refreshTokenFromDB.orElse(null);
     }
 
-    // token에서 payload 권한 값 중 subject값 가져오기 (토큰으로부터 이메일 가져오기)
-    public String getEmailFromToken(String token){
+    // token에서 payload 권한 값 중 subject값 가져오기 (토큰으로부터 닉네임 가져오기)
+    public String getNicknameFromToken(String token){
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
 
