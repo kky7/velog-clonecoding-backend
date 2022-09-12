@@ -14,8 +14,8 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    // 일반회원가입은 이메일 지정, 카카오 로그인은 카카오 이메일
-    @Column(nullable = false)
+    // 일반회원가입은 이메일 필수 지정, 카카오 로그인은 회원이 선택했으면 기입 안했으면 null
+    @Column
     private String email;
 
     // 일반회원가입은 회원가입시 지정, 카카오 로그인은 카카오 닉네임 사용
