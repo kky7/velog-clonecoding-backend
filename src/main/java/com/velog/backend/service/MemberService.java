@@ -1,7 +1,5 @@
 package com.velog.backend.service;
 
-import com.velog.backend.Repository.MemberRepository;
-import com.velog.backend.Repository.RefreshTokenRepository;
 import com.velog.backend.dto.request.EmailReqDto;
 import com.velog.backend.dto.request.LoginReqDto;
 import com.velog.backend.dto.request.SignupReqDto;
@@ -14,6 +12,8 @@ import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.jwt.util.JwtUtil;
 import com.velog.backend.jwt.util.TokenProperties;
+import com.velog.backend.repository.MemberRepository;
+import com.velog.backend.repository.RefreshTokenRepository;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

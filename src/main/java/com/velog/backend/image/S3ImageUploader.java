@@ -34,7 +34,7 @@ public class S3ImageUploader {
 
         /** PutObjectRequest 는 Aws S3 버킷에 업로드할 객체 메타 데이터와 파일 데이터로 이루어져 있음.
          * 사진 파일을 로컬 스토리지에 저장하지 않고 업로드 하기 위해서는,
-         * inputStream 을 통해 Byte 만이 전달 되어 해당 파일에 대한 정보가 없기 때문에
+         * inputStream 을 통해 Byte 만 전달해야 하는데 그렇게 되면 해당 파일에 대한 정보가 없기 때문에
          * objectMetadata 에 파일에 대한 정보를 추가하여 매개변수로 같이 전달해야 함.
          */
 
