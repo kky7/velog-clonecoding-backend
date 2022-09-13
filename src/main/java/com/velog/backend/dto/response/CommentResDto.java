@@ -1,6 +1,7 @@
 package com.velog.backend.dto.response;
 
 import com.velog.backend.entity.Comment;
+import com.velog.backend.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,21 +9,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class CommentResponseDto {
+public class CommentResDto {
 
     private Long commentId;
     private Long postId;
+    private String profileUrl;
+    private String nickname;
     private String content;
     private String date;
-    private CommentMemberResponseDto responseDto;
 
-    public CommentResponseDto (Comment comment) {
+    public CommentResDto(Comment comment) {
         this.commentId = comment.getCommentId();
         this.postId = comment.getPost().getPostId();
+        this.profileUrl = comment.getMember().getProfileUrl();
+        this.nickname = comment.getMember().getNickname();
         this.content = comment.getContent();
         this.date = String.valueOf(comment.getCreatedAt());
-        this.responseDto = new CommentMemberResponseDto(comment.getMember());
-
 
     }
 

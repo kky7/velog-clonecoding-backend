@@ -1,6 +1,6 @@
 package com.velog.backend.entity;
 
-import com.velog.backend.dto.request.CommentRequestDto;
+import com.velog.backend.dto.request.CommentReqDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,15 +31,15 @@ public class Comment extends Timestamped {
     private Member member;
 
 
-    public Comment(Post post, Member member, CommentRequestDto requestDto) {
+    public Comment(Post post, Member member, CommentReqDto requestDto) {
         this.post = post;
         this.member = member;
         this.content = requestDto.getContent();
     }
 
     // 댓글 수정
-    public void update(CommentRequestDto commentRequestDto) {
-        this.content = commentRequestDto.getContent();
+    public void update(CommentReqDto commentReqDto) {
+        this.content = commentReqDto.getContent();
     }
 
 }
