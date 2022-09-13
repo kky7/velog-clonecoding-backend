@@ -7,7 +7,7 @@ public interface SuccessMsg {
     String LOGOUT_SUCCESS = "로그아웃 되었습니다.";
     String REISSUE_ACCESS_TOKEN = "Access 토큰이 발급되었습니다.";
     String PROFILE_SUCCESS = "사용자 프로필 정보가 조회되었습니다.";
-    String POST_SUCCESS = "게시글이 작성되었습니다.";
+//    String POST_SUCCESS = "게시글이 작성되었습니다.";
     String PROFILEURL_SUCCESS = "프로필 사진 URL이 조회되었습니다.";
     String CREATE_SUCCESS = "작성이 완료되었습니다.";
     String UPDATE_SUCCESS = "수정이 완료되었습니다.";
