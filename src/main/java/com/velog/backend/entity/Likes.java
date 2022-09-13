@@ -27,6 +27,9 @@ public class Likes {
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
 
-
+    public Likes(Member member, Post post) {
+        this.member = member;
+        this.post = post;
+    }
 
 }
