@@ -1,10 +1,11 @@
 package com.velog.backend.dto.response;
 
 import com.velog.backend.entity.Comment;
-import com.velog.backend.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.format.DateTimeFormatter;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class CommentResDto {
         this.profileUrl = comment.getMember().getProfileUrl();
         this.nickname = comment.getMember().getNickname();
         this.content = comment.getContent();
-        this.date = String.valueOf(comment.getCreatedAt());
+        this.date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(comment.getCreatedAt());
 
     }
 

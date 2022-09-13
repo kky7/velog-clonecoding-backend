@@ -25,4 +25,9 @@ public interface ErrorMsg {
     // 사용자 찾을 수 없음
     String MEMBER_NOT_FOUND = "사용자를 찾을 수 없습니다.";
     String REFRESH_TOKEN_NOT_MATCHED = "Refresh 토큰이 일치하지 않습니다.";
+
+    // 게시글, 댓글
+    String POST_NOT_FOUND = "해당 게시글을 찾을 수 없습니다.";
+    String COMMENT_NOT_FOUND = "해당 댓글을 찾을 수 없습니다.";
+    String MEMBER_NOT_MATCHED = "작성자가 아닙니다.";
 }
