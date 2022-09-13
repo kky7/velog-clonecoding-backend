@@ -1,6 +1,6 @@
 package com.velog.backend.security.user;
 
-import com.velog.backend.Repository.MemberRepository;
+import com.velog.backend.repository.MemberRepository;
 import com.velog.backend.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
