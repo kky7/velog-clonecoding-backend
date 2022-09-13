@@ -29,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String jwtHeader = request.getHeader(TokenProperties.AUTH_HEADER);
         String requestUri = request.getRequestURI();
 
-        if(requestUri.contains("auth")){
+        if(requestUri.contains("/auth/")){
             if(jwtHeader == null){
                 // auth가 포함된 uri는 header 값이 있어야 한다.
                 jwtUtil.exceptionResponse(response,HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_LOGIN);
