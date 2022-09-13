@@ -1,4 +1,4 @@
-package com.velog.backend.Repository;
+package com.velog.backend.repository;
 
 import com.velog.backend.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
