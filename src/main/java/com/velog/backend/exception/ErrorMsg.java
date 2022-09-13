@@ -27,6 +27,9 @@ public interface ErrorMsg {
     String REFRESH_TOKEN_NOT_MATCHED = "Refresh 토큰이 일치하지 않습니다.";
     String BLOG_NOT_FOUND = "블로그를 찾을 수 없습니다.";
 
+    // 게시글, 댓글
     String TAG_NOT_FOUND = "태그를 찾을 수 없습니다.";
     String POST_NOT_FOUND = "게시글이 존재하지 않습니다.";
+    String COMMENT_NOT_FOUND = "해당 댓글을 찾을 수 없습니다.";
+    String MEMBER_NOT_MATCHED = "작성자가 아닙니다.";
 }
