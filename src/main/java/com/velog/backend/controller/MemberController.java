@@ -52,10 +52,10 @@ public class MemberController {
         return memberService.reissue(request,response);
     }
     
-    // 프로필 사진 요청
-    @GetMapping("/auth/member/profile-img")
-    public ResponseEntity<?> getProfileUrl(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return memberService.getProfileUrl(userDetails);
+    // 프로필 정보 요청
+    @GetMapping("/auth/member/profile-info")
+    public ResponseEntity<?> getProfileInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return memberService.getProfileInfo(userDetails);
     }
 
     // 카카오 로그인

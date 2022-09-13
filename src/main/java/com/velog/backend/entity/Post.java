@@ -1,5 +1,6 @@
 package com.velog.backend.entity;
 
+import com.velog.backend.dto.request.PostReqDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +26,7 @@ public class Post extends Timestamped{
     private int likesNum;
 
     @ElementCollection
-    @CollectionTable(name="imgUrl")
+    @CollectionTable(name="img_url")
     private List<String> imgUrl = new ArrayList<>();
 
     @JoinColumn(name = "member_id", nullable = false)
@@ -37,5 +38,12 @@ public class Post extends Timestamped{
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTagList;
+
+    public Post(PostReqDto postReqDto, Member member){
+        this.title = postReqDto.getTitle();
+        this.content = postReqDto.getContent();
+        this.imgUrl = postReqDto.getImgUrl();
+        this.member = member;
+    }
 
 }
