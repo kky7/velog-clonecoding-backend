@@ -10,4 +10,7 @@ public interface SuccessMsg {
     String CREATE_SUCCESS = "작성이 완료되었습니다.";
     String UPDATE_SUCCESS = "수정이 완료되었습니다.";
     String DELETE_SUCCESS = "삭제가 완료되었습니다.";
+
+    String LIKE_SUCCESS = "좋아요가 완료되었습니다.";
+    String LIKE_CANCEL = "좋아요가 취소되었습니다.";
 }
