@@ -22,4 +22,5 @@ public class PostResDto {
         this.imgUrl = postReqDto.getImgUrl();
         this.tag = postReqDto.getTag();
     }
+
 }
