@@ -162,7 +162,6 @@ public class MemberService {
     @Transactional
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshHeader = request.getHeader(TokenProperties.REFRESH_HEADER);
-        String accessHeader = request.getHeader(TokenProperties.AUTH_HEADER);
 
         if(refreshHeader == null){
             return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_REFRESH_TOKEN);
@@ -172,23 +171,7 @@ public class MemberService {
             return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
 
-        if(accessHeader == null){
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_ACCESS_TOKEN);
-        }
-
-        if (!accessHeader.startsWith(TokenProperties.TOKEN_TYPE)) {
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_ACCESS_TOKEN);
-        }
-
         String refreshToken = refreshHeader.replace(TokenProperties.TOKEN_TYPE, "");
-        String accessToken = accessHeader.replace(TokenProperties.TOKEN_TYPE, "");
-
-        // Access 토큰 검증
-        String AccessTokenValidate = jwtUtil.validateToken(accessToken);
-
-        if (AccessTokenValidate.equals(TokenProperties.INVALID)) {
-            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_ACCESS_TOKEN);
-        }
 
         // Refresh 토큰 검증
         String refreshTokenValidate = jwtUtil.validateToken(refreshToken);
