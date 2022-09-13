@@ -7,10 +7,12 @@ import com.velog.backend.dto.request.KakaoUserInfoDto;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
+import com.velog.backend.entity.RefreshToken;
 import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.jwt.util.JwtUtil;
 import com.velog.backend.jwt.util.TokenProperties;
 import com.velog.backend.repository.MemberRepository;
+import com.velog.backend.repository.RefreshTokenRepository;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +42,14 @@ public class KakaoService {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final ServiceUtil serviceUtil;
 
     @Transactional
     public ResponseEntity<?> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
-
+        System.out.println("in");
+        System.out.println(code);
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String kakaoAccessToken = getAccessToken(code);
 
@@ -56,10 +60,19 @@ public class KakaoService {
         Member kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
         // 4. 강제 로그인 처리
-        forceLogin(kakaoUser);
+//        forceLogin(kakaoUser);
 
         String ourAccessToken = jwtUtil.createToken(kakaoUser.getNickname(), TokenProperties.AUTH_HEADER);
         String ourRefreshToken = jwtUtil.createToken(kakaoUser.getNickname(),TokenProperties.REFRESH_HEADER);
+
+        RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(kakaoUser);
+
+        if(refreshTokenFromDB == null){
+            RefreshToken saveRefreshToken = new RefreshToken(kakaoUser, ourRefreshToken);
+            refreshTokenRepository.save(saveRefreshToken);
+        } else{
+            refreshTokenFromDB.updateValue(ourRefreshToken);
+        }
 
         response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + ourAccessToken);
         response.addHeader(TokenProperties.REFRESH_HEADER, TokenProperties.TOKEN_TYPE + ourRefreshToken);
@@ -72,7 +85,7 @@ public class KakaoService {
     }
 
     private String getAccessToken(String code) throws JsonProcessingException {
-
+        System.out.println("getAccessToken in");
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -132,6 +145,7 @@ public class KakaoService {
     }
 
     private Member registerKakaoUserIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
+        System.out.println("registerKakaoUserIfNeeded in");
         // DB 에 중복된 Kakao Id 가 있는지 확인
         Long kakaoId = kakaoUserInfo.getId();
         Member kakaoUser = memberRepository.findByKakaoId(kakaoId).orElse(null);
