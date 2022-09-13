@@ -7,7 +7,6 @@ import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
 import com.velog.backend.entity.Tag;
-import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.repository.PostTagRepository;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -35,7 +33,6 @@ public class PostService  {
     @Transactional
     public ResponseEntity<?> createPost(PostReqDto postReqDto, UserDetailsImpl userDetails){
         Member member = userDetails.getMember();
-        Long memberId = member.getMemberId();
         Post post = new Post(postReqDto, member);
         Post savePost = postRepository.save(post);
         List<String> tagList = postReqDto.getTag();
@@ -46,10 +43,10 @@ public class PostService  {
                 if(tagInDB == null){
                     Tag tag = new Tag(tagName);
                     Tag saveTag = tagRepository.save(tag);
-                    PostTag postTag = new PostTag(savePost, saveTag, memberId);
+                    PostTag postTag = new PostTag(savePost, member, saveTag);
                     postTagRepository.save(postTag);
                 } else{
-                    PostTag postTag = new PostTag(savePost, tagInDB, memberId);
+                    PostTag postTag = new PostTag(savePost, member, tagInDB);
                     postTagRepository.save(postTag);
                 }
             }
@@ -61,19 +58,19 @@ public class PostService  {
     }
 
     // 게시글 수정
-    @Transactional
-    public ResponseEntity<?> updatePost(Long postId, PostReqDto postReqDto, UserDetailsImpl userDetails){
-
-        Optional<Post> optionalPost = postRepository.findByPostId(postId);
-        if(optionalPost.isEmpty()){
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
-        }
-
-        Member member = userDetails.getMember();
-        Long memberId = member.getMemberId();
-        List<String> tagList = postReqDto.getTag();
-
-
-    }
+//    @Transactional
+//    public ResponseEntity<?> updatePost(Long postId, PostReqDto postReqDto, UserDetailsImpl userDetails){
+//
+//        Optional<Post> optionalPost = postRepository.findByPostId(postId);
+//        if(optionalPost.isEmpty()){
+//            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+//        }
+//
+//        Member member = userDetails.getMember();
+//        Long memberId = member.getMemberId();
+//        List<String> tagList = postReqDto.getTag();
+//
+//
+//    }
 
 }

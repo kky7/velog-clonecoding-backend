@@ -22,10 +22,10 @@ public class PostController {
         return postService.createPost(postReqDto, userDetails);
     }
 
-    // 게시글 수정
-    @PutMapping("/auth/post/{postId}")
-    public ResponseEntity<?> updatePost(@PathVariable Long postId, @RequestBody PostReqDto postReqDto,@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return postService.updatePost(postId,postReqDto,userDetails);
-    }
+//    // 게시글 수정
+//    @PutMapping("/auth/post/{postId}")
+//    public ResponseEntity<?> updatePost(@PathVariable Long postId, @RequestBody PostReqDto postReqDto,@AuthenticationPrincipal UserDetailsImpl userDetails){
+//        return postService.updatePost(postId,postReqDto,userDetails);
+//    }
 
 }

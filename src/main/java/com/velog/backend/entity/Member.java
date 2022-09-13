@@ -14,7 +14,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    // 일반회원가입은 이메일 필수 지정, 카카오 로그인은 회원이 선택했으면 기입 안했으면 null
+    // 일반회원가입은 이메일 필수 지정, 카카오 로그인은 null
     @Column
     private String email;
 
@@ -30,15 +30,16 @@ public class Member {
     @Column
     private String introduction;
 
-    // 일반회원가입시 null, 카카오 로그인은 카카오 아이디
-    @Column
-    private Long kakaoId;
-
     @Column
     private String profileUrl;
 
     @Column
     private String velogTitle;
+
+    // 일반회원가입시 null, 카카오 로그인은 카카오 아이디
+    @Column
+    private Long kakaoId;
+
 
     public boolean validatePassword(PasswordEncoder passwordEncoder, String password) {
         return passwordEncoder.matches(password, this.password);
@@ -50,5 +51,13 @@ public class Member {
         this.password = signupReqDto.getPassword();
         this.introduction = signupReqDto.getIntroduction();
         this.velogTitle = velogTitle;
+    }
+
+    public Member(String nickname, String password, String profileUrl, String velogTitle, Long kakaoId){
+        this.nickname = nickname;
+        this.password = password;
+        this.profileUrl = profileUrl;
+        this.velogTitle = velogTitle;
+        this.kakaoId = kakaoId;
     }
 }

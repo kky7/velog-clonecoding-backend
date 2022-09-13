@@ -3,13 +3,21 @@ package com.velog.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.velog.backend.Repository.MemberRepository;
 import com.velog.backend.dto.request.KakaoUserInfoDto;
+import com.velog.backend.dto.response.GlobalResDto;
+import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
+import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.jwt.util.JwtUtil;
+import com.velog.backend.jwt.util.TokenProperties;
+import com.velog.backend.repository.MemberRepository;
+import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +26,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,20 +41,34 @@ public class KakaoService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
+    private final ServiceUtil serviceUtil;
 
     @Transactional
     public ResponseEntity<?> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
 
         // 1. "인가 코드"로 "액세스 토큰" 요청
-        String accessToken = getAccessToken(code);
+        String kakaoAccessToken = getAccessToken(code);
 
         // 2. 토큰으로 카카오 API 호출
-        KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(accessToken);
+        KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(kakaoAccessToken);
 
         // 3. 필요시 카카오ID로 회원가입 처리
+        Member kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
+        // 4. 강제 로그인 처리
+        forceLogin(kakaoUser);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        String ourAccessToken = jwtUtil.createToken(kakaoUser.getNickname(), TokenProperties.AUTH_HEADER);
+        String ourRefreshToken = jwtUtil.createToken(kakaoUser.getNickname(),TokenProperties.REFRESH_HEADER);
+
+        response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + ourAccessToken);
+        response.addHeader(TokenProperties.REFRESH_HEADER, TokenProperties.TOKEN_TYPE + ourRefreshToken);
+
+        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(kakaoUser);
+
+        GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.LOGIN_SUCCESS,memberInfoResDto);
+
+        return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 
     private String getAccessToken(String code) throws JsonProcessingException {
@@ -117,14 +140,29 @@ public class KakaoService {
         if (kakaoUser == null) {
             // 닉네임 중복 체크
             String kakaoNickname = kakaoUserInfo.getNickname();
-            Member findMember = memberRepository.findByNickname(kakaoNickname).orElse(null);
+            Member findMemberByNickname = memberRepository.findByNickname(kakaoNickname).orElse(null);
 
-//            while (findMember == null){
-//
-//            }
+            while (findMemberByNickname == null){
+                kakaoNickname = kakaoNickname + serviceUtil.CreateRandomString();
+                findMemberByNickname = memberRepository.findByNickname(kakaoNickname).orElse(null);
+            }
+
+            String password = UUID.randomUUID().toString();
+            String encodedPassword = passwordEncoder.encode(password);
+
+            kakaoUser = new Member(kakaoNickname, encodedPassword, kakaoUserInfo.getProfileUrl(), kakaoNickname + ".log", kakaoId);
+            memberRepository.save(kakaoUser);
+
         }
 
         return kakaoUser;
+    }
+
+    private void forceLogin(Member kakaoUser) {
+        UserDetailsImpl userDetails = new UserDetailsImpl();
+        userDetails.setMember(kakaoUser);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 }

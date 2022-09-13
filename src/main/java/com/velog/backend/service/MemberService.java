@@ -6,7 +6,7 @@ import com.velog.backend.dto.request.EmailReqDto;
 import com.velog.backend.dto.request.LoginReqDto;
 import com.velog.backend.dto.request.SignupReqDto;
 import com.velog.backend.dto.response.GlobalResDto;
-import com.velog.backend.dto.response.ImgUrlResDto;
+import com.velog.backend.dto.response.ProfileInfoDto;
 import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.RefreshToken;
@@ -73,8 +73,8 @@ public class MemberService {
 
             memberRepository.save(member);
 
-            MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(), signupReqDto.getEmail(), nickname, signupReqDto.getIntroduction(), member.getProfileUrl(), velogTitle);
-
+//            MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(), signupReqDto.getEmail(), nickname, signupReqDto.getIntroduction(), member.getProfileUrl(), velogTitle);
+            MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member);
             GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.SIGNUP_SUCCESS, memberInfoResDto);
             return new ResponseEntity<>(globalResDto, HttpStatus.OK);
         }
@@ -115,8 +115,8 @@ public class MemberService {
         // 응답 헤더에 토큰 담아서 보내기
         TokenToHeaders(response, accessToken, refreshToken);
 
-        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(),email, nickname, member.getIntroduction(), member.getProfileUrl(), member.getVelogTitle());
-
+//        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(),email, nickname, member.getIntroduction(), member.getProfileUrl(), member.getVelogTitle());
+        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member);
 
         GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.LOGIN_SUCCESS,memberInfoResDto);
 
@@ -218,10 +218,10 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseEntity<?> getProfileUrl(UserDetailsImpl userDetails){
-        String profileUrl = userDetails.getMember().getProfileUrl();
+    public ResponseEntity<?> getProfileInfo(UserDetailsImpl userDetails){
+        Member member = userDetails.getMember();
 
-        GlobalResDto<ImgUrlResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.PROFILEURL_SUCCESS,new ImgUrlResDto(profileUrl));
+        GlobalResDto<ProfileInfoDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.PROFILE_SUCCESS,new ProfileInfoDto(member));
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 

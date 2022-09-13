@@ -41,7 +41,7 @@ public class TagService {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.TAG_NOT_FOUND);
         }
 
-        List<PostTag> postTagList = postTagRepository.findAllByTagAndRefMemberIdOrderByCreatedAtDesc(tag,member.getMemberId());
+        List<PostTag> postTagList = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member,tag);
 
         for(PostTag postTag : postTagList){
             Post post = postTag.getPost();

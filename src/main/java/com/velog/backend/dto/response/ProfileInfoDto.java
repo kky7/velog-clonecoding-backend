@@ -8,20 +8,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberInfoResDto {
-    private Long memberId;
-    private String email;
+public class ProfileInfoDto {
+    private String imgUrl;
     private String nickname;
     private String introduction;
-    private String profileUrl;
-    private String velogTitle;
 
-    public MemberInfoResDto(Member member){
-        this.memberId = member.getMemberId();
-        this.email = member.getEmail();
+    public ProfileInfoDto(Member member){
+        this.imgUrl = member.getProfileUrl();
         this.nickname = member.getNickname();
         this.introduction = member.getIntroduction();
-        this.profileUrl = member.getProfileUrl();
-        this.velogTitle = member.getVelogTitle();
     }
 }
