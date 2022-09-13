@@ -32,7 +32,7 @@ public class Member {
 
     // 일반회원가입시 null, 카카오 로그인은 카카오 아이디
     @Column
-    private String kakaoId;
+    private Long kakaoId;
 
     @Column
     private String profileUrl;
