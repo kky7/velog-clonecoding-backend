@@ -9,5 +9,5 @@ import java.util.List;
 
 
 public interface PostTagRepository extends JpaRepository<PostTag, Long> {
-//    List<PostTag> findAllByMemberAndTag(Member member, Tag tag);
+    List<PostTag> findAllByMemberAndTagOrderByPostDesc(Member member, Tag tag);
 }

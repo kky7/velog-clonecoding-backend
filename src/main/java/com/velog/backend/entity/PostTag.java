@@ -17,9 +17,9 @@ public class PostTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
 
-//    @JoinColumn(name = "member_id", nullable = false)
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    private Member member;
+    @JoinColumn(name = "member_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
     @JoinColumn(name = "tag_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
