@@ -33,8 +33,6 @@ public class SearchService {
         List<Post> postList = postRepository.findAllByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(searchWord, searchWord);
         List<SearchPostResDto> searchPostResDtoList = new ArrayList<>();
 
-        System.out.println(searchWord);
-
         for (Post post : postList) {
 
             Long commentsNum = commentRepository.countByPost(post);
