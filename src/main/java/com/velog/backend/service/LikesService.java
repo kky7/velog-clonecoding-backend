@@ -1,6 +1,5 @@
 package com.velog.backend.service;
 
-import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.LikesResDto;
 import com.velog.backend.entity.Likes;
 import com.velog.backend.entity.Member;
