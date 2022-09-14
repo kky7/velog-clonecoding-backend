@@ -15,4 +15,5 @@ public interface SuccessMsg {
 
     String LIKE_SUCCESS = "좋아요가 완료되었습니다.";
     String LIKE_CANCEL = "좋아요가 취소되었습니다.";
+    String TRANSFORM_SUCCESS = "이미지 URL 변환이 완료 되었습니다.";
 }
