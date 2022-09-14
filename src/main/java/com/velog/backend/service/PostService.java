@@ -71,6 +71,7 @@ public class PostService {
 
         Member member = userDetails.getMember();
         System.out.println(member.getMemberId());
+        System.out.println(post.getMember().getMemberId());
 //        if(post.validateMember(member)) {
 //            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
 //        }
@@ -84,32 +85,36 @@ public class PostService {
         if(beforeTagSize < afterTagSize){
             updatePostTag(beforeTagSize, beforePostTagList, afterTagList);
 
-            // 새로 생성
-            String finalNewTagName = afterTagList.get(afterTagSize-1);
-            Tag tagCheck = tagRepository.findByTagName(finalNewTagName);
-            if(tagCheck == null){
-                Tag tag = new Tag(finalNewTagName);
-                Tag saveTag = tagRepository.save(tag);
-                PostTag postTag = new PostTag(post, member, saveTag);
-                postTagRepository.save(postTag);
-            } else {
-                PostTag postTag = new PostTag(post, member, tagCheck);
-                postTagRepository.save(postTag);
+            for(int i=afterTagSize-beforeTagSize-1; i<afterTagSize; i++){
+                // 새로 생성
+                String finalNewTagName = afterTagList.get(i);
+                Tag tagCheck = tagRepository.findByTagName(finalNewTagName);
+                if(tagCheck == null){
+                    Tag tag = new Tag(finalNewTagName);
+                    Tag saveTag = tagRepository.save(tag);
+                    PostTag postTag = new PostTag(post, member, saveTag);
+                    postTagRepository.save(postTag);
+                } else {
+                    PostTag postTag = new PostTag(post, member, tagCheck);
+                    postTagRepository.save(postTag);
+                }
             }
+
         } else if(beforeTagSize == afterTagSize){
             updatePostTag(beforeTagSize,beforePostTagList,afterTagList);
         } else {
             updatePostTag(afterTagSize,beforePostTagList,afterTagList);
 
-            // 남은거 삭제
-            PostTag redidualPostTag = beforePostTagList.get(beforeTagSize-1);
-            Tag tagOfResidual = redidualPostTag.getTag();
-            postTagRepository.delete(redidualPostTag);
-            List<PostTag> postTagList = postTagRepository.findAllByTag(tagOfResidual);
-            if(postTagList.size() < 1){
-                tagRepository.delete(tagOfResidual);
+            for(int i=beforeTagSize-afterTagSize-1; i<beforeTagSize;i++){
+                // 남은거 삭제
+                PostTag redidualPostTag = beforePostTagList.get(i);
+                Tag tagOfResidual = redidualPostTag.getTag();
+                postTagRepository.delete(redidualPostTag);
+                List<PostTag> postTagList = postTagRepository.findAllByTag(tagOfResidual);
+                if(postTagList.size() < 1){
+                    tagRepository.delete(tagOfResidual);
+                }
             }
-
         }
 
         post.update(postReqDto);
