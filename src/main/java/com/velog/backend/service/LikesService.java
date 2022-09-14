@@ -25,6 +25,7 @@ public class LikesService {
     private final LikesRepository likesRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final ServiceUtil serviceUtil;
 
 
     @Transactional
@@ -32,11 +33,11 @@ public class LikesService {
 
         Member member = getMember(likesResDto);
         if (null == member) {
-            return dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
         }
         Post post = getPost(likesResDto);
         if (null == post) {
-            return dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Likes checkLikes = likesRepository.findByMemberAndPost(member, post);
@@ -45,12 +46,13 @@ public class LikesService {
             Likes likes = new Likes(member, post);
             likesRepository.save(likes);
             post.like();
-            return dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_SUCCESS);
+            return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_SUCCESS);
         }
 
         likesRepository.deleteById(checkLikes.getLikeId());
         post.unlike();
-        return dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
+        return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
+
     }
 
     // MemberId 가져오기
@@ -63,10 +65,5 @@ public class LikesService {
     private Post getPost(LikesResDto likesResDto) {
         Optional<Post> optionalPost = postRepository.findById(likesResDto.getPostId());
         return optionalPost.orElse(null);
-    }
-
-    private ResponseEntity<?> dataNullResponse(HttpStatus httpStatus, String msg){
-        GlobalResDto<String> globalResDto = new GlobalResDto<>(httpStatus,msg);
-        return new ResponseEntity<>(globalResDto,httpStatus);
     }
 }
