@@ -3,10 +3,8 @@ package com.velog.backend.service;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.MyPageLikePostResDto;
 import com.velog.backend.dto.response.MyPagePostResDto;
-import com.velog.backend.entity.Likes;
-import com.velog.backend.entity.Member;
-import com.velog.backend.entity.Post;
-import com.velog.backend.entity.PostTag;
+import com.velog.backend.dto.response.MyPageResDto;
+import com.velog.backend.entity.*;
 import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.repository.*;
 import com.velog.backend.security.user.UserDetailsImpl;
@@ -34,15 +32,28 @@ public class MyPageService {
     @Transactional
     public ResponseEntity<?> getAllPostByMember(String nickname) {
 
-        List<MyPagePostResDto> myPagePostResDtoList = new ArrayList<>();
-
         Member member = memberRepository.findAllByNickname(nickname);
 
         if (null == member) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
         }
 
+        List<PostTag> postTagListByMember = postTagRepository.findAllByMember(member);
+        List<String> allTagNameList = new ArrayList<>();
+        List<Long> numOfTagList = new ArrayList<>();
+        for(PostTag postTag : postTagListByMember){
+            Tag tag = postTag.getTag();
+            String tagName = tag.getTagName();
+            if(!allTagNameList.contains(tagName)){
+                allTagNameList.add(tagName);
+                Long numOfTag = postTagRepository.countByMemberAndTag(member,tag);
+                numOfTagList.add(numOfTag);
+            }
+        }
+
         List<Post> postList = postRepository.findAllByMember(member);
+
+        List<MyPagePostResDto> myPagePostResDtoList = new ArrayList<>();
 
         for (Post post : postList) {
             Long commentsNum = commentRepository.countByPost(post);
@@ -61,13 +72,14 @@ public class MyPageService {
                 tagNameList.add(tagName);
             }
 
-            String velogTitle = post.getMember().getVelogTitle();
 
-            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, velogTitle, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormatOfPost(post));
+            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormatOfPost(post));
             myPagePostResDtoList.add(myPagePostResDto);
         }
 
-        GlobalResDto<?> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, myPagePostResDtoList);
+        MyPageResDto myPageResDto = new MyPageResDto(member, allTagNameList, numOfTagList, myPagePostResDtoList);
+
+        GlobalResDto<?> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, myPageResDto);
 
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }

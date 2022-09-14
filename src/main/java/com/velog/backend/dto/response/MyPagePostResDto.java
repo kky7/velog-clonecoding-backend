@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 public class MyPagePostResDto {
 
-    private String velogTitle;
     private Long postId;
     private String title;
     private String content;
@@ -20,9 +19,8 @@ public class MyPagePostResDto {
     private Long commentsNum;
     private String date;
 
-    public MyPagePostResDto(Post post, String velogTitle, Long commentsNum, String imgUrl, List<String> tag, String dateFormat) {
+    public MyPagePostResDto(Post post, Long commentsNum, String imgUrl, List<String> tag, String dateFormat) {
         this.postId = post.getPostId();
-        this.velogTitle = velogTitle;
         this.title = post.getTitle();
         this.content = post.getContent();
         this.imgUrl = imgUrl;
