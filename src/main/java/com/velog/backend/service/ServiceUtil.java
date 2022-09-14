@@ -86,7 +86,7 @@ public class ServiceUtil {
     public String getDataFormatOfComment(Comment commment){
         LocalDate curDateTime = LocalDate.from(LocalDateTime.now());
         LocalDate postCreatedAt = LocalDate.from(commment.getCreatedAt());
-        System.out.println(postCreatedAt);
+//        System.out.println(postCreatedAt);
         Period period = Period.between(postCreatedAt,curDateTime);
         String dateFormat = "";
         int days = (period.getDays());
