@@ -30,7 +30,7 @@ public class PostController {
     }
 
     // 게시글 수정
-    @PatchMapping("/auth/post/{postId}")
+    @PutMapping("/auth/post/{postId}")
     public ResponseEntity<?> updatePost(@PathVariable Long postId,@RequestBody @Valid PostReqDto postReqDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
         return postService.updatePost(postId, postReqDto, userDetails);
     }
