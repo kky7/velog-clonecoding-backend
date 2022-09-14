@@ -1,10 +1,7 @@
 package com.velog.backend.service;
 
 import com.velog.backend.dto.request.PostReqDto;
-import com.velog.backend.dto.response.CommentInfoDto;
-import com.velog.backend.dto.response.GetPostDetailDto;
-import com.velog.backend.dto.response.GlobalResDto;
-import com.velog.backend.dto.response.PostResDto;
+import com.velog.backend.dto.response.*;
 import com.velog.backend.entity.*;
 import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
@@ -186,6 +183,27 @@ public class PostService {
 
         GlobalResDto<GetPostDetailDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getPostDetailDto);
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
+    }
+
+    @Transactional
+    public ResponseEntity<?> getAllPostDesc(){
+        List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
+
+        List<GetAllPostDto> getAllPostDtoList = new ArrayList<>();
+
+        for(Post post : postList){
+            Long commentsNum = commentRepository.countByPost(post);
+            List<String> imgUrlList = post.getImgUrl();
+            String imgUrl = null;
+            if(!imgUrlList.isEmpty()){
+                imgUrl = imgUrlList.get(0);
+            }
+            GetAllPostDto getAllPostDto = new GetAllPostDto(post, commentsNum, imgUrl,serviceUtil.getDataFormatOfPost(post));
+            getAllPostDtoList.add(getAllPostDto);
+        }
+
+        GlobalResDto<List<GetAllPostDto>> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getAllPostDtoList);
+        return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
     public void updatePostTag(int size, List<PostTag> beforePostTagList, List<String> afterTagList){

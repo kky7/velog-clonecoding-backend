@@ -50,8 +50,15 @@ public class PostController {
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
+    // 게시글 상세 조회
     @GetMapping("/post/{postId}")
     public ResponseEntity<?> getPostDetail(@PathVariable Long postId){
         return postService.getPostDetail(postId);
+    }
+
+    // 게시글 전체 목록 최신순 조회
+    @GetMapping("/recent")
+    public ResponseEntity<?> getAllPostDesc(){
+        return postService.getAllPostDesc();
     }
 }
