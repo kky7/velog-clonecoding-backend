@@ -3,6 +3,8 @@ package com.velog.backend.service;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.entity.Comment;
 import com.velog.backend.entity.Post;
+import com.velog.backend.entity.PostTag;
+import com.velog.backend.repository.PostTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +14,15 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
 public class ServiceUtil {
+
+    private final PostTagRepository postTagRepository;
 
     public ResponseEntity<?> dataNullResponse(HttpStatus httpStatus, String msg){
         GlobalResDto<String> globalResDto = new GlobalResDto<>(httpStatus,msg);
@@ -50,7 +56,6 @@ public class ServiceUtil {
     public String getDataFormatOfPost(Post post){
         LocalDate curDateTime = LocalDate.from(LocalDateTime.now());
         LocalDate postCreatedAt = LocalDate.from(post.getCreatedAt());
-//        System.out.println(postCreatedAt.getYear()+"년"+" "+postCreatedAt.getMonth()+"월"+" "+postCreatedAt.getDayOfMonth()+"일");
         Period period = Period.between(postCreatedAt,curDateTime);
         String dateFormat = "";
         int days = (period.getDays());
@@ -86,7 +91,6 @@ public class ServiceUtil {
     public String getDataFormatOfComment(Comment commment){
         LocalDate curDateTime = LocalDate.from(LocalDateTime.now());
         LocalDate postCreatedAt = LocalDate.from(commment.getCreatedAt());
-//        System.out.println(postCreatedAt);
         Period period = Period.between(postCreatedAt,curDateTime);
         String dateFormat = "";
         int days = (period.getDays());
@@ -117,6 +121,17 @@ public class ServiceUtil {
         }
 
         return dateFormat;
+    }
+
+    public List<String> getTagNameListFromPostTag(Post post){
+        List<PostTag> postTagList = postTagRepository.findAllByPost(post);
+        List<String> tagNameList = new ArrayList<>();
+
+        for(PostTag postTag : postTagList){
+            String tagName = postTag.getTag().getTagName();
+            tagNameList.add(tagName);
+        }
+        return tagNameList;
     }
 
 }

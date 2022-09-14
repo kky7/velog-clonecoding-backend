@@ -160,13 +160,7 @@ public class PostService {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
-        List<PostTag> postTagList = postTagRepository.findAllByPost(post);
-        List<String> tagNameList = new ArrayList<>();
-
-        for(PostTag postTag : postTagList){
-            String tagName = postTag.getTag().getTagName();
-            tagNameList.add(tagName);
-        }
+        List<String> tagNameList = serviceUtil.getTagNameListFromPostTag(post);
 
         List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
 
@@ -198,7 +192,7 @@ public class PostService {
             if(!imgUrlList.isEmpty()){
                 imgUrl = imgUrlList.get(0);
             }
-            GetAllPostDto getAllPostDto = new GetAllPostDto(post, commentsNum, imgUrl,serviceUtil.getDataFormatOfPost(post));
+            GetAllPostDto getAllPostDto = new GetAllPostDto(post, commentsNum, imgUrl, serviceUtil.getDataFormatOfPost(post));
             getAllPostDtoList.add(getAllPostDto);
         }
 
