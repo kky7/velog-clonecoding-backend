@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post,Long> {
     Optional<Post> findByPostId(Long id);
     List<Post> findAllByOrderByCreatedAtDesc();
+    List<Post> findAllByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String titleSearch, String contentSearch);
 }

@@ -7,7 +7,6 @@ import com.velog.backend.entity.Post;
 import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.repository.LikesRepository;
-import com.velog.backend.repository.MemberRepository;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +22,12 @@ import java.util.Optional;
 public class LikesService {
 
     private final LikesRepository likesRepository;
-    private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final ServiceUtil serviceUtil;
 
 
     @Transactional
-    public ResponseEntity<?> likes(LikesResDto likesResDto, UserDetailsImpl userDetails) {
+    public ResponseEntity<?> getLikes(LikesResDto likesResDto, UserDetailsImpl userDetails) {
 
         Member member = userDetails.getMember();
         if (null == member) {
