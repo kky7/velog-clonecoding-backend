@@ -45,10 +45,12 @@ public class LikesService {
         if (null == checkLikes) {
             Likes likes = new Likes(member, post);
             likesRepository.save(likes);
+            post.like();
             return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_SUCCESS);
         }
 
         likesRepository.deleteById(checkLikes.getLikeId());
+        post.unlike();
         return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
 
     }
