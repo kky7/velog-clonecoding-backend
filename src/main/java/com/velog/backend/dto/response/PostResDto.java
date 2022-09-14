@@ -2,16 +2,12 @@ package com.velog.backend.dto.response;
 
 import com.velog.backend.dto.request.PostReqDto;
 import com.velog.backend.entity.Post;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class PostResDto {
     private Long postId;
