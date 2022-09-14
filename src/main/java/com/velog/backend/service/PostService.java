@@ -1,14 +1,14 @@
 package com.velog.backend.service;
 
 import com.velog.backend.dto.request.PostReqDto;
+import com.velog.backend.dto.response.CommentInfoDto;
+import com.velog.backend.dto.response.GetPostDetailDto;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.PostResDto;
-import com.velog.backend.entity.Member;
-import com.velog.backend.entity.Post;
-import com.velog.backend.entity.PostTag;
-import com.velog.backend.entity.Tag;
+import com.velog.backend.entity.*;
 import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.repository.CommentRepository;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.repository.PostTagRepository;
 import com.velog.backend.repository.TagRepository;
@@ -30,6 +30,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
+    private final CommentRepository commentRepository;
     private final ServiceUtil serviceUtil;
 
     // 게시글 작성
@@ -155,6 +156,38 @@ public class PostService {
         return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
     }
 
+    @Transactional
+    public ResponseEntity<?> getPostDetail(Long postId){
+        Post post = isPresentPost(postId);
+        if (null == post) {
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+        }
+
+        List<PostTag> postTagList = postTagRepository.findAllByPost(post);
+        List<String> tagNameList = new ArrayList<>();
+
+        for(PostTag postTag : postTagList){
+            String tagName = postTag.getTag().getTagName();
+            tagNameList.add(tagName);
+        }
+
+        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
+
+        List<Comment> commentList = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
+
+        for(Comment comment : commentList){
+            CommentInfoDto commentInfoDto = new CommentInfoDto(comment, serviceUtil.getDataFormatOfComment(comment));
+            commentInfoDtoList.add(commentInfoDto);
+        }
+
+        String postDateFormat = serviceUtil.getDataFormatOfPost(post);
+
+        GetPostDetailDto getPostDetailDto = new GetPostDetailDto(post, post.getMember(), tagNameList,commentInfoDtoList, postDateFormat);
+
+        GlobalResDto<GetPostDetailDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getPostDetailDto);
+        return new ResponseEntity<>(globalResDto,HttpStatus.OK);
+    }
+
     public void updatePostTag(int size, List<PostTag> beforePostTagList, List<String> afterTagList){
         for (int i=0; i<size; i++){
             String newTagName = afterTagList.get(i);
@@ -182,4 +215,5 @@ public class PostService {
         Optional<Post> optionalPost = postRepository.findById(postId);
         return optionalPost.orElse(null);
     }
+
 }

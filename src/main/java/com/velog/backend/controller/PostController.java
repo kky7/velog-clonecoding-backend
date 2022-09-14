@@ -49,4 +49,9 @@ public class PostController {
         GlobalResDto<?> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.TRANSFORM_SUCCESS, imgUrl);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
+
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable Long postId){
+        return postService.getPostDetail(postId);
+    }
 }
