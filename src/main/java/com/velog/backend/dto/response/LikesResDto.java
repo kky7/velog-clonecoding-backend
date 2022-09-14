@@ -7,6 +7,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class LikesResDto {
 
-    private Long memberId;
     private Long postId;
 }

@@ -9,6 +9,7 @@ import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.repository.LikesRepository;
 import com.velog.backend.repository.MemberRepository;
 import com.velog.backend.repository.PostRepository;
+import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +29,9 @@ public class LikesService {
 
 
     @Transactional
-    public ResponseEntity<?> likes(LikesResDto likesResDto) {
+    public ResponseEntity<?> likes(LikesResDto likesResDto, UserDetailsImpl userDetails) {
 
-        Member member = getMember(likesResDto);
+        Member member = userDetails.getMember();
         if (null == member) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
         }
@@ -52,12 +53,6 @@ public class LikesService {
         post.unlike();
         return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
 
-    }
-
-    // MemberId 가져오기
-    private Member getMember(LikesResDto likesResDto) {
-        Optional<Member> optionalMember = memberRepository.findById(likesResDto.getMemberId());
-        return optionalMember.orElse(null);
     }
 
     // PostId 가져오기
