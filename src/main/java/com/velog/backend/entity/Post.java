@@ -52,9 +52,10 @@ public class Post extends Timestamped{
         this.imgUrl = postReqDto.getImgUrl();
     }
 
-//    public boolean validateMember(Member member) {
-//        return !this.member.equals(member);
-//    }
+    public boolean validateMember(Long memberId) {
+        Long thisMemberId = this.member.getMemberId();
+        return !memberId.equals(thisMemberId);
+    }
 
     public void like(){
         this.likesNum += 1;
