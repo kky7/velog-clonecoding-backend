@@ -70,11 +70,10 @@ public class PostService {
         }
 
         Member member = userDetails.getMember();
-        System.out.println(member.getMemberId());
-        System.out.println(post.getMember().getMemberId());
-//        if(post.validateMember(member)) {
-//            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
-//        }
+
+        if(post.validateMember(member.getMemberId())) {
+            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+        }
 
         List<String> afterTagList = postReqDto.getTag();
         List<PostTag> beforePostTagList = postTagRepository.findAllByPost(post);
@@ -85,7 +84,7 @@ public class PostService {
         if(beforeTagSize < afterTagSize){
             updatePostTag(beforeTagSize, beforePostTagList, afterTagList);
 
-            for(int i=afterTagSize-beforeTagSize-1; i<afterTagSize; i++){
+            for(int i=beforeTagSize; i<afterTagSize; i++){
                 // 새로 생성
                 String finalNewTagName = afterTagList.get(i);
                 Tag tagCheck = tagRepository.findByTagName(finalNewTagName);
@@ -105,7 +104,7 @@ public class PostService {
         } else {
             updatePostTag(afterTagSize,beforePostTagList,afterTagList);
 
-            for(int i=beforeTagSize-afterTagSize-1; i<beforeTagSize;i++){
+            for(int i=afterTagSize; i<beforeTagSize;i++){
                 // 남은거 삭제
                 PostTag redidualPostTag = beforePostTagList.get(i);
                 Tag tagOfResidual = redidualPostTag.getTag();
@@ -134,9 +133,9 @@ public class PostService {
 
         Member member = userDetails.getMember();
 
-//        if(post.validateMember(member)) {
-//            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
-//        }
+        if(post.validateMember(member.getMemberId())) {
+            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+        }
 
         List<PostTag> postTagList = postTagRepository.findAllByPost(post);
         List<Tag> tagList = new ArrayList<>();
