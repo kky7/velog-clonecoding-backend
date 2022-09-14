@@ -18,7 +18,7 @@ public class LikesController {
 
     @PostMapping("/auth/likes")
     public ResponseEntity<?> likes(@RequestBody LikesResDto likesResDto,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return likesService.likes(likesResDto, userDetails);
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return likesService.getLikes(likesResDto, userDetails);
     }
 }
