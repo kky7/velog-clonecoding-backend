@@ -122,6 +122,7 @@ public class PostService {
 
     }
 
+    // 게시글 삭제
     @Transactional
     public ResponseEntity<?> deletePost(Long postId, UserDetailsImpl userDetails){
         Post post = isPresentPost(postId);
@@ -153,6 +154,7 @@ public class PostService {
         return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
     }
 
+    // 게시글 상세 조회
     @Transactional
     public ResponseEntity<?> getPostDetail(Long postId){
         Post post = isPresentPost(postId);
@@ -179,6 +181,7 @@ public class PostService {
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 
+    // 메인 전체 게시글 목록 최신순 조회
     @Transactional
     public ResponseEntity<?> getAllPostDesc(){
         List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();

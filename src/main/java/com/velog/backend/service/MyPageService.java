@@ -30,6 +30,7 @@ public class MyPageService {
     private final LikesRepository likesRepository;
     private final ServiceUtil serviceUtil;
 
+    // 멤버별 게시물 전체 조회
     @Transactional
     public ResponseEntity<?> getAllPostByMember(String nickname) {
 
@@ -71,6 +72,7 @@ public class MyPageService {
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
+    // 내가 좋아요한 게시글 전체 조회
     @Transactional
     public ResponseEntity<?> getMyLikePost(UserDetailsImpl userDetails) {
 

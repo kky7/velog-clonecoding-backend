@@ -27,7 +27,7 @@ public class SearchService {
     private final CommentRepository commentRepository;
     private final PostTagRepository postTagRepository;
 
-
+    // 게시글 검색
     @Transactional
     public ResponseEntity<?> searchPost(String searchWord) {
         List<Post> postList = postRepository.findAllByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(searchWord, searchWord);
