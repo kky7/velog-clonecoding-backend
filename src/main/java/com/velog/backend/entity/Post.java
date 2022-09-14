@@ -46,4 +46,22 @@ public class Post extends Timestamped{
         this.member = member;
     }
 
+    public void update(PostReqDto postReqDto){
+        this.title = postReqDto.getTitle();
+        this.content = postReqDto.getContent();
+        this.imgUrl = postReqDto.getImgUrl();
+    }
+
+//    public boolean validateMember(Member member) {
+//        return !this.member.equals(member);
+//    }
+
+    public void like(){
+        this.likesNum += 1;
+    }
+
+    public void unlike(){
+        this.likesNum -= 1;
+    }
+
 }

@@ -30,4 +30,8 @@ public class PostTag {
         this.member = member;
         this.tag = tag;
     }
+
+    public void updateTag(Tag tag){
+        this.tag = tag;
+    }
 }
