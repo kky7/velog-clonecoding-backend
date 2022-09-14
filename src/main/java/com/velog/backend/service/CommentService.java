@@ -25,6 +25,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final ServiceUtil serviceUtil;
 
     // 댓글 생성
     @Transactional
@@ -33,7 +34,7 @@ public class CommentService {
         Member member = userDetails.getMember();
         Post post = isPresentPost(requestDto.getPostId());
         if (null == post) {
-            return dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Comment comment = new Comment(post, member, requestDto);
@@ -51,13 +52,13 @@ public class CommentService {
 
         Comment comment = isPresentComment(commentId);
         if (null == comment ) {
-            return dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
         }
 
         Member member = comment.getMember();
         Long memberId = member.getMemberId();
         if (!memberId.equals(userDetails.getMember().getMemberId())) {
-            return dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         comment.update(requestDto);
@@ -74,25 +75,19 @@ public class CommentService {
 
         Comment comment = isPresentComment(commentId);
         if (null == comment ) {
-            return dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
+            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
         }
 
         Member member = comment.getMember();
         Long memberId = member.getMemberId();
         if (!memberId.equals(userDetails.getMember().getMemberId())) {
-            return dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         commentRepository.delete(comment);
         GlobalResDto<?> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
 
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
-    }
-
-
-    private ResponseEntity<?> dataNullResponse(HttpStatus httpStatus, String msg){
-        GlobalResDto<String> globalResDto = new GlobalResDto<>(httpStatus,msg);
-        return new ResponseEntity<>(globalResDto,httpStatus);
     }
 
     // 댓글 ID 유무 확인
