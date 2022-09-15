@@ -52,8 +52,8 @@ public class PostService {
                 }
             }
         }
-
-        PostResDto postResDto = new PostResDto(savePost.getPostId(),postReqDto);
+        List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
+        PostResDto postResDto = new PostResDto(post,curTagListInDB);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.CREATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
@@ -71,6 +71,15 @@ public class PostService {
 
         if(post.validateMember(member.getMemberId())) {
             return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+        }
+
+
+        if(postReqDto.getTag() == null){
+            post.update(postReqDto);
+            List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
+            PostResDto postResDto = new PostResDto(post, curTagListInDB);
+            GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
+            return new ResponseEntity<>(globalResDto, HttpStatus.OK);
         }
 
         List<String> afterTagList = postReqDto.getTag();
@@ -114,9 +123,10 @@ public class PostService {
             }
         }
 
-        post.update(postReqDto);
 
-        PostResDto postResDto = new PostResDto(post.getPostId(),postReqDto);
+        post.update(postReqDto);
+        List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
+        PostResDto postResDto = new PostResDto(post,curTagListInDB);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
 

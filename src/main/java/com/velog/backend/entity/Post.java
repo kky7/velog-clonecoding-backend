@@ -47,9 +47,18 @@ public class Post extends Timestamped{
     }
 
     public void update(PostReqDto postReqDto){
-        this.title = postReqDto.getTitle();
-        this.content = postReqDto.getContent();
-        this.imgUrl = postReqDto.getImgUrl();
+        String title = postReqDto.getTitle();
+        String content = postReqDto.getContent();
+        List<String> imgUrl = postReqDto.getImgUrl();
+        if(title != null){
+            this.title = title;
+        }
+        if(content != null){
+            this.content = content;
+        }
+        if(imgUrl != null){
+            this.imgUrl = imgUrl;
+        }
     }
 
     public boolean validateMember(Long memberId) {
