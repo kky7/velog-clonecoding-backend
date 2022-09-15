@@ -1,6 +1,5 @@
 package com.velog.backend.dto.response;
 
-import com.velog.backend.dto.request.PostReqDto;
 import com.velog.backend.entity.Post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
