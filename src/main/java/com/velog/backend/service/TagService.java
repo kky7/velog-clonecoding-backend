@@ -1,8 +1,8 @@
 package com.velog.backend.service;
 
-import com.velog.backend.dto.response.GelAllPostByTagInBlogDto;
+import com.velog.backend.dto.response.TagSearchPostsDto;
 import com.velog.backend.dto.response.GlobalResDto;
-import com.velog.backend.dto.response.PostOfTagDto;
+import com.velog.backend.dto.response.TagSearchPostDto;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
@@ -28,8 +28,8 @@ public class TagService {
     private final CommentRepository commentRepository;
     private final ServiceUtil serviceUtil;
 
-    @Transactional
-    public ResponseEntity<?> tagSearchInblog(String nickname, String searchTagName){
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> tagSearch(String nickname, String searchTagName){
         Member member = memberRepository.findByNickname(nickname).orElse(null);
         if (member == null){
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.BLOG_NOT_FOUND);
@@ -41,9 +41,9 @@ public class TagService {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.TAG_NOT_FOUND);
         }
 
-        List<PostTag> postTagList = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member,tag);
+        List<PostTag> postTagList = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member, tag);
 
-        List<PostOfTagDto> postOfTagDtoList = new ArrayList<>();
+        List<TagSearchPostDto> tagSearchPostDtoList = new ArrayList<>();
         for(PostTag postTag : postTagList){
             Post post = postTag.getPost();
 
@@ -54,12 +54,12 @@ public class TagService {
                 imgUrl = imgUrlList.get(0);
             }
             Long commentsNum = commentRepository.countByPost(post);
-            PostOfTagDto postOfTagDto = new PostOfTagDto(post, tagNameList, imgUrl, commentsNum, serviceUtil.getDataFormatOfPost(post));
-            postOfTagDtoList.add(postOfTagDto);
+            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNameList, imgUrl, commentsNum, serviceUtil.getDataFormatOfPost(post));
+            tagSearchPostDtoList.add(tagSearchPostDto);
         }
 
-        GelAllPostByTagInBlogDto gelAllPostByTagInBlogDto = new GelAllPostByTagInBlogDto(member, postOfTagDtoList);
-        GlobalResDto<GelAllPostByTagInBlogDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, gelAllPostByTagInBlogDto);
+        TagSearchPostsDto tagSearchPostsDto = new TagSearchPostsDto(member, tagSearchPostDtoList);
+        GlobalResDto<TagSearchPostsDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, tagSearchPostsDto);
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 

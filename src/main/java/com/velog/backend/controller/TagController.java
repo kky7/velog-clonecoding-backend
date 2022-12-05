@@ -16,6 +16,6 @@ public class TagController {
 
     @GetMapping("/velog/{nickname}")
     public ResponseEntity<?> tagSearchInblog(@PathVariable String nickname, @RequestParam(value = "tag") String tagName){
-        return tagService.tagSearchInblog(nickname,tagName);
+        return tagService.tagSearch(nickname,tagName);
     }
 }

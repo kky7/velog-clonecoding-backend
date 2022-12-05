@@ -14,16 +14,16 @@ public class MyPageResDto {
     private String profileUrl;
     private String introduction;
     private List<String> tagList;
-    private List<Long> numOfTagList;
+    private List<Long> tagNum;
     private List<MyPagePostResDto> postList;
 
-    public MyPageResDto(Member member, List<String>tagList, List<Long> numOfTagList, List<MyPagePostResDto> postList){
+    public MyPageResDto(Member member, List<String>tagList, List<Long> tagNum, List<MyPagePostResDto> postList){
         this.nickname = member.getNickname();
         this.velogTitle = member.getVelogTitle();
         this.profileUrl = member.getProfileUrl();
         this.introduction = member.getIntroduction();
         this.tagList = tagList;
-        this.numOfTagList = numOfTagList;
+        this.tagNum = tagNum;
         this.postList = postList;
     }
 }

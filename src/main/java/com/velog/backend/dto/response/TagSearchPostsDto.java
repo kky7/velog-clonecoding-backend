@@ -8,18 +8,18 @@ import java.util.List;
 
 @NoArgsConstructor
 @Getter
-public class GelAllPostByTagInBlogDto {
+public class TagSearchPostsDto {
     private String nickname;
     private String profileUrl;
     private String introduction;
     private String velogTitle;
-    private List<PostOfTagDto> postList;
+    private List<TagSearchPostDto> posts;
 
-    public GelAllPostByTagInBlogDto(Member member, List<PostOfTagDto> postList){
+    public TagSearchPostsDto(Member member, List<TagSearchPostDto> postList){
         this.nickname = member.getNickname();
         this.profileUrl = member.getProfileUrl();
         this.introduction = member.getIntroduction();
         this.velogTitle = member.getVelogTitle();
-        this.postList = postList;
+        this.posts = postList;
     }
 }

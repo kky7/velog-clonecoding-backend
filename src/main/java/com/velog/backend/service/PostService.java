@@ -165,7 +165,7 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getPostDetail(Long postId){
         Post post = isPresentPost(postId);
         if (null == post) {
@@ -192,11 +192,11 @@ public class PostService {
     }
 
     // 메인 전체 게시글 목록 최신순 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllPostDesc(){
         List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
 
-        List<GetAllPostDto> getAllPostDtoList = new ArrayList<>();
+        List<PostsResDto> postsResDtoList = new ArrayList<>();
 
         for(Post post : postList){
             Long commentsNum = commentRepository.countByPost(post);
@@ -205,11 +205,11 @@ public class PostService {
             if(!imgUrlList.isEmpty()){
                 imgUrl = imgUrlList.get(0);
             }
-            GetAllPostDto getAllPostDto = new GetAllPostDto(post, commentsNum, imgUrl, serviceUtil.getDataFormatOfPost(post));
-            getAllPostDtoList.add(getAllPostDto);
+            PostsResDto postsResDto = new PostsResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormatOfPost(post));
+            postsResDtoList.add(postsResDto);
         }
 
-        GlobalResDto<List<GetAllPostDto>> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getAllPostDtoList);
+        GlobalResDto<List<PostsResDto>> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, postsResDtoList);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 

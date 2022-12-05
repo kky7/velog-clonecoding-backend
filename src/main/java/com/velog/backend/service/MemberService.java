@@ -38,19 +38,18 @@ public class MemberService {
     private final ServiceUtil serviceUtil;
 
     // 이메일 중복체크
-    @Transactional
     public ResponseEntity<?> emailCheck(EmailReqDto emailReqDto){
         String email = emailReqDto.getEmail();
 
         if(! emailFormatChek(email)) {
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_EMAIL);
         }
-        else if(isEmailInDB(email)) {
+        else if(isEmailDuplicate(email)) {
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_EMAIL);
         }
         else{
             GlobalResDto<EmailReqDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.SIGNUP_OK, emailReqDto);
-            return new ResponseEntity<>(globalResDto,HttpStatus.OK);
+            return new ResponseEntity<>(globalResDto, HttpStatus.OK);
         }
     }
 
@@ -61,9 +60,9 @@ public class MemberService {
         String passwordConfirm = signupReqDto.getPasswordConfirm();
         String nickname = signupReqDto.getNickname();
 
-        if(isNicknameInDB(nickname)){
+        if(isNicknameDuplicate(nickname)){
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_NICKNAME);
-        } else if (!isSamePassword(password,passwordConfirm)){
+        } else if (!isSamePassword(password, passwordConfirm)){
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.PASSWORD_NOT_MATCHED);
         } else {
             signupReqDto.setPassword(passwordEncoder.encode(password));
@@ -72,8 +71,6 @@ public class MemberService {
             Member member = new Member(signupReqDto, velogTitle);
 
             memberRepository.save(member);
-
-//            MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(), signupReqDto.getEmail(), nickname, signupReqDto.getIntroduction(), member.getProfileUrl(), velogTitle);
             MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member);
             GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.SIGNUP_SUCCESS, memberInfoResDto);
             return new ResponseEntity<>(globalResDto, HttpStatus.OK);
@@ -84,14 +81,14 @@ public class MemberService {
     @Transactional
     public ResponseEntity<?> login(LoginReqDto loginReqDto, HttpServletResponse response){
         String email = loginReqDto.getEmail();
-        Member member = isPresentMemberByEmail(email);
+        Member member = findMemberByEmail(email);
 
         if(member == null){
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.EMAIL_NOT_FOUND);
         }
 
 
-        if(!member.validatePassword(passwordEncoder,loginReqDto.getPassword())){
+        if(!member.validatePassword(passwordEncoder, loginReqDto.getPassword())){
             return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_PASSWORD);
         }
 
@@ -115,12 +112,11 @@ public class MemberService {
         // 응답 헤더에 토큰 담아서 보내기
         TokenToHeaders(response, accessToken, refreshToken);
 
-//        MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member.getMemberId(),email, nickname, member.getIntroduction(), member.getProfileUrl(), member.getVelogTitle());
         MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member);
 
-        GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.LOGIN_SUCCESS,memberInfoResDto);
+        GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.LOGIN_SUCCESS, memberInfoResDto);
 
-        return new ResponseEntity<>(globalResDto,HttpStatus.OK);
+        return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
     @Transactional
@@ -150,12 +146,12 @@ public class MemberService {
                 RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
                 if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
                     refreshTokenRepository.delete(refreshTokenFromDB);
-                    return serviceUtil.dataNullResponse(HttpStatus.OK,SuccessMsg.LOGOUT_SUCCESS);
+                    return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LOGOUT_SUCCESS);
                 } else {
-                    return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN,ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
+                    return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
                 }
             default:
-                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN,ErrorMsg.INVALID_REFRESH_TOKEN);
+                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -181,7 +177,7 @@ public class MemberService {
                 return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.EXPIRED_REFRESH_TOKEN);
             case TokenProperties.VALID:
                 String nickname = jwtUtil.getNicknameFromToken(refreshToken);
-                Member member = isPresentMemberByNickname(nickname);
+                Member member = findMemberByEmail(nickname);
 
                 if (member == null) {
                     return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_FOUND);
@@ -190,13 +186,13 @@ public class MemberService {
                     if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
                         String newAccessToken = jwtUtil.createToken(member.getNickname(), TokenProperties.AUTH_HEADER);
                         response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + newAccessToken);
-                        return serviceUtil.dataNullResponse(HttpStatus.OK,SuccessMsg.REISSUE_ACCESS_TOKEN);
+                        return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.REISSUE_ACCESS_TOKEN);
                     } else {
-                        return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN,ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
+                        return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
                     }
                 }
             default:
-                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN,ErrorMsg.INVALID_REFRESH_TOKEN);
+                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -204,24 +200,24 @@ public class MemberService {
     public ResponseEntity<?> getProfileInfo(UserDetailsImpl userDetails){
         Member member = userDetails.getMember();
 
-        GlobalResDto<ProfileInfoDto> globalResDto = new GlobalResDto<>(HttpStatus.OK,SuccessMsg.PROFILE_SUCCESS,new ProfileInfoDto(member));
+        GlobalResDto<ProfileInfoDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.PROFILE_SUCCESS, new ProfileInfoDto(member));
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
 
     @Transactional(readOnly = true)
-    public Member isPresentMemberByEmail(String email) {
+    public Member findMemberByEmail(String email) {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         return optionalMember.orElse(null);
     }
 
     @Transactional(readOnly = true)
-    public Member isPresentMemberByNickname(String nickname) {
+    public Member findMemberByNickname(String nickname) {
         Optional<Member> optionalMember = memberRepository.findByNickname(nickname);
         return optionalMember.orElse(null);
     }
 
-    private boolean isEmailInDB(String email){
-        Member member = isPresentMemberByEmail(email);
+    private boolean isEmailDuplicate(String email){
+        Member member = findMemberByEmail(email);
 
         return member != null;
     }
@@ -232,8 +228,8 @@ public class MemberService {
         return email.matches(email_regex) && email.endsWith(".com");
     }
 
-    private boolean isNicknameInDB(String nickname){
-        Member member = isPresentMemberByNickname(nickname);
+    private boolean isNicknameDuplicate(String nickname){
+        Member member = findMemberByNickname(nickname);
 
         return member != null;
     }
