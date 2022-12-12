@@ -43,22 +43,22 @@ public class TagService {
 
         List<PostTag> postTagList = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member, tag);
 
-        List<TagSearchPostDto> tagSearchPostDtoList = new ArrayList<>();
+        List<TagSearchPostDto> tagSearchPostDtos = new ArrayList<>();
         for(PostTag postTag : postTagList){
             Post post = postTag.getPost();
 
-            List<String> tagNameList = serviceUtil.getTagNameListFromPostTag(post);
-            List<String> imgUrlList = post.getImgUrl();
+            List<String> tagNames = serviceUtil.getTagNamesFromPostTag(post);
+            List<String> imgUrls = post.getImgUrl();
             String imgUrl = null;
-            if(!imgUrlList.isEmpty()){
-                imgUrl = imgUrlList.get(0);
+            if(!imgUrls.isEmpty()){
+                imgUrl = imgUrls.get(0);
             }
             Long commentsNum = commentRepository.countByPost(post);
-            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNameList, imgUrl, commentsNum, serviceUtil.getDataFormatOfPost(post));
-            tagSearchPostDtoList.add(tagSearchPostDto);
+            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNames, imgUrl, commentsNum, serviceUtil.getDataFormatOfPost(post));
+            tagSearchPostDtos.add(tagSearchPostDto);
         }
 
-        TagSearchPostsDto tagSearchPostsDto = new TagSearchPostsDto(member, tagSearchPostDtoList);
+        TagSearchPostsDto tagSearchPostsDto = new TagSearchPostsDto(member, tagSearchPostDtos);
         GlobalResDto<TagSearchPostsDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, tagSearchPostsDto);
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }

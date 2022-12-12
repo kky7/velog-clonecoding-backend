@@ -36,24 +36,15 @@ public class PostService {
         Member member = userDetails.getMember();
         Post post = new Post(postReqDto, member);
         Post savePost = postRepository.save(post);
-        List<String> tagList = postReqDto.getTag();
+        List<String> tagNames = postReqDto.getTag();
 
-        if(tagList != null){
-            for (String tagName : tagList){
-                Tag tagInDB = tagRepository.findByTagName(tagName);
-                if(tagInDB == null){
-                    Tag tag = new Tag(tagName);
-                    Tag saveTag = tagRepository.save(tag);
-                    PostTag postTag = new PostTag(savePost, member, saveTag);
-                    postTagRepository.save(postTag);
-                } else{
-                    PostTag postTag = new PostTag(savePost, member, tagInDB);
-                    postTagRepository.save(postTag);
-                }
+        if(tagNames != null){
+            for (String tagName : tagNames){
+                savePostTag(savePost, member, tagName);
             }
         }
-        List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
-        PostResDto postResDto = new PostResDto(post,curTagListInDB);
+
+        PostResDto postResDto = new PostResDto(post, tagNames);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.CREATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
@@ -62,13 +53,12 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> updatePost(Long postId, PostReqDto postReqDto, UserDetailsImpl userDetails){
 
-        Post post = isPresentPost(postId);
-        if (null == post) {
+        Post post = findPostById(postId);
+        if (post == null) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Member member = userDetails.getMember();
-
         if(post.validateMember(member.getMemberId())) {
             return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
@@ -76,56 +66,41 @@ public class PostService {
 
         if(postReqDto.getTag() == null){
             post.update(postReqDto);
-            List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
+            List<String> curTagListInDB = serviceUtil.getTagNamesFromPostTag(post);
             PostResDto postResDto = new PostResDto(post, curTagListInDB);
             GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
             return new ResponseEntity<>(globalResDto, HttpStatus.OK);
         }
 
-        List<String> afterTagList = postReqDto.getTag();
-        List<PostTag> beforePostTagList = postTagRepository.findAllByPost(post);
-
-        int beforeTagSize = beforePostTagList.size();
-        int afterTagSize = afterTagList.size();
+        List<String> afterTags = postReqDto.getTag();
+        List<PostTag> beforePostTags = postTagRepository.findAllByPost(post);
+        int beforeTagSize = beforePostTags.size();
+        int afterTagSize = afterTags.size();
 
         if(beforeTagSize < afterTagSize){
-            updatePostTag(beforeTagSize, beforePostTagList, afterTagList);
+            updatePostTag(beforeTagSize, beforePostTags, afterTags);
 
-            for(int i=beforeTagSize; i<afterTagSize; i++){
-                // 새로 생성
-                String finalNewTagName = afterTagList.get(i);
-                Tag tagCheck = tagRepository.findByTagName(finalNewTagName);
-                if(tagCheck == null){
-                    Tag tag = new Tag(finalNewTagName);
-                    Tag saveTag = tagRepository.save(tag);
-                    PostTag postTag = new PostTag(post, member, saveTag);
-                    postTagRepository.save(postTag);
-                } else {
-                    PostTag postTag = new PostTag(post, member, tagCheck);
-                    postTagRepository.save(postTag);
-                }
+            for(int i = beforeTagSize; i < afterTagSize; i++){
+                String tagName = afterTags.get(i);
+                savePostTag(post, member, tagName);
             }
 
         } else if(beforeTagSize == afterTagSize){
-            updatePostTag(beforeTagSize,beforePostTagList,afterTagList);
+            updatePostTag(beforeTagSize, beforePostTags, afterTags);
         } else {
-            updatePostTag(afterTagSize,beforePostTagList,afterTagList);
+            updatePostTag(afterTagSize, beforePostTags, afterTags);
 
             for(int i=afterTagSize; i<beforeTagSize;i++){
                 // 남은거 삭제
-                PostTag redidualPostTag = beforePostTagList.get(i);
-                Tag tagOfResidual = redidualPostTag.getTag();
+                PostTag redidualPostTag = beforePostTags.get(i);
+                Tag residualTag = redidualPostTag.getTag();
                 postTagRepository.delete(redidualPostTag);
-                List<PostTag> postTagList = postTagRepository.findAllByTag(tagOfResidual);
-                if(postTagList.size() < 1){
-                    tagRepository.delete(tagOfResidual);
-                }
+                if(postTagRepository.countByTag(residualTag) < 1){tagRepository.delete(residualTag);}
             }
         }
 
-
         post.update(postReqDto);
-        List<String> curTagListInDB = serviceUtil.getTagNameListFromPostTag(post);
+        List<String> curTagListInDB = serviceUtil.getTagNamesFromPostTag(post);
         PostResDto postResDto = new PostResDto(post,curTagListInDB);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
@@ -135,8 +110,8 @@ public class PostService {
     // 게시글 삭제
     @Transactional
     public ResponseEntity<?> deletePost(Long postId, UserDetailsImpl userDetails){
-        Post post = isPresentPost(postId);
-        if (null == post) {
+        Post post = findPostById(postId);
+        if (post == null) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
@@ -146,19 +121,18 @@ public class PostService {
             return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
-        List<PostTag> postTagList = postTagRepository.findAllByPost(post);
-        List<Tag> tagList = new ArrayList<>();
+        List<PostTag> postTags = postTagRepository.findAllByPost(post);
+        List<Tag> tags = new ArrayList<>();
 
-        for(PostTag postTag : postTagList){
+        for(PostTag postTag : postTags){
             Tag tag = postTag.getTag();
-            tagList.add(tag);
+            tags.add(tag);
         }
 
         postRepository.delete(post);
 
-        for (Tag tag : tagList){
-            List<PostTag> postTagListByTag = postTagRepository.findAllByTag(tag);
-            if(postTagListByTag.size() < 1){tagRepository.delete(tag);}
+        for (Tag tag : tags){
+            if(postTagRepository.countByTag(tag) < 1){tagRepository.delete(tag);}
         }
 
         return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
@@ -167,12 +141,12 @@ public class PostService {
     // 게시글 상세 조회
     @Transactional(readOnly = true)
     public ResponseEntity<?> getPostDetail(Long postId){
-        Post post = isPresentPost(postId);
+        Post post = findPostById(postId);
         if (null == post) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
-        List<String> tagNameList = serviceUtil.getTagNameListFromPostTag(post);
+        List<String> tagNameList = serviceUtil.getTagNamesFromPostTag(post);
 
         List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
 
@@ -213,30 +187,41 @@ public class PostService {
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
-    public void updatePostTag(int size, List<PostTag> beforePostTagList, List<String> afterTagList){
-        for (int i=0; i<size; i++){
-            String newTagName = afterTagList.get(i);
-            PostTag beforePostTag = beforePostTagList.get(i);
-            Tag beforeTag = beforePostTag.getTag();
+    @Transactional
+    public void savePostTag(Post post, Member member, String tagName){
+        Tag tagInDB = tagRepository.findByTagName(tagName);
+        if(tagInDB == null){
+            Tag saveTag = tagRepository.save(new Tag(tagName));
+            PostTag postTag = new PostTag(post, member, saveTag);
+            postTagRepository.save(postTag);
+        } else {
+            PostTag postTag = new PostTag(post, member, tagInDB);
+            postTagRepository.save(postTag);
+        }
+    }
 
+    @Transactional
+    public void updatePostTag(int size, List<PostTag> beforePostTags, List<String> afterTags){
+        for (int i = 0; i < size; i++){
+            String newTagName = afterTags.get(i);
+            PostTag beforePostTag = beforePostTags.get(i);
+            Tag beforeTag = beforePostTag.getTag();
             Tag tagInDB = tagRepository.findByTagName(newTagName);
 
             if(tagInDB == null){
-                Tag tag = new Tag(newTagName);
-                Tag saveTag = tagRepository.save(tag);
+                Tag saveTag = tagRepository.save(new Tag(newTagName));
                 beforePostTag.updateTag(saveTag);
             } else{
                 beforePostTag.updateTag(tagInDB);
             }
 
-            List<PostTag> postTagList = postTagRepository.findAllByTag(beforeTag);
-            if(postTagList.size() < 1){tagRepository.delete(beforeTag);}
+            if(postTagRepository.countByTag(beforeTag) < 1){tagRepository.delete(beforeTag);}
         }
     }
 
     // 게시글 ID 유무 확인
     @Transactional(readOnly = true)
-    public Post isPresentPost(Long postId) {
+    public Post findPostById(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         return optionalPost.orElse(null);
     }
