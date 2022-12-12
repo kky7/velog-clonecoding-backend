@@ -27,6 +27,8 @@
 </div>
 <br><br>
 
+## [API Link](https://screeching-crater-139.notion.site/Velog-Clone-Coding-API-1282207c279043eeb338100ae815bc64)
+
 ## 🤟🏻 주요 기능
 
 <br>
@@ -68,10 +70,18 @@
 - 입력값에 따라 게시글 검색
 - 검색 결과에 따라 필터링된 게시글 조회
 
+### `태그 기능`
+- 개인 블로그 태그에 따라 게시글 조회
+
 ### `내 벨로그`
 
 - [내 벨로그] 사용자가 쓴 게시글 조회
 - [내 벨로그] 태그에 따라 특정 게시글 조회
 - [내 벨로그] 내가 좋아요한 게시글 조회
+
+<br><br>
+
+## 🤟🏻 ERD
+<img src="./img/velog-clone-erd.png">
 
 <br><br>
