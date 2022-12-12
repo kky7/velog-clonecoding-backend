@@ -5,10 +5,7 @@ import com.velog.backend.dto.response.*;
 import com.velog.backend.entity.*;
 import com.velog.backend.exception.ErrorMsg;
 import com.velog.backend.exception.SuccessMsg;
-import com.velog.backend.repository.CommentRepository;
-import com.velog.backend.repository.PostRepository;
-import com.velog.backend.repository.PostTagRepository;
-import com.velog.backend.repository.TagRepository;
+import com.velog.backend.repository.*;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +25,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
     private final CommentRepository commentRepository;
+    private final ImageRepository imageRepository;
     private final ServiceUtil serviceUtil;
 
     // 게시글 작성
@@ -37,6 +35,7 @@ public class PostService {
         Post post = new Post(postReqDto, member);
         Post savePost = postRepository.save(post);
         List<String> tagNames = postReqDto.getTag();
+        List<String> imgUrls = postReqDto.getImgUrl();
 
         if(tagNames != null){
             for (String tagName : tagNames){
@@ -44,7 +43,13 @@ public class PostService {
             }
         }
 
-        PostResDto postResDto = new PostResDto(post, tagNames);
+        if(imgUrls != null){
+            for(String imgUrl: imgUrls){
+                imageRepository.save(new Image(savePost, imgUrl));
+            }
+        }
+
+        PostResDto postResDto = new PostResDto(post, imgUrls, tagNames);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.CREATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
@@ -63,48 +68,20 @@ public class PostService {
             return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
-
-        if(postReqDto.getTag() == null){
-            post.update(postReqDto);
-            List<String> curTagListInDB = serviceUtil.getTagNamesFromPostTag(post);
-            PostResDto postResDto = new PostResDto(post, curTagListInDB);
-            GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
-            return new ResponseEntity<>(globalResDto, HttpStatus.OK);
+        List<String> newTagNames = postReqDto.getTag();
+        if(newTagNames != null){
+            updatePostTagAndTag(newTagNames, post, member);
         }
 
-        List<String> afterTags = postReqDto.getTag();
-        List<PostTag> beforePostTags = postTagRepository.findAllByPost(post);
-        int beforeTagSize = beforePostTags.size();
-        int afterTagSize = afterTags.size();
-
-        if(beforeTagSize < afterTagSize){
-            updatePostTag(beforeTagSize, beforePostTags, afterTags);
-
-            for(int i = beforeTagSize; i < afterTagSize; i++){
-                String tagName = afterTags.get(i);
-                savePostTag(post, member, tagName);
-            }
-
-        } else if(beforeTagSize == afterTagSize){
-            updatePostTag(beforeTagSize, beforePostTags, afterTags);
-        } else {
-            updatePostTag(afterTagSize, beforePostTags, afterTags);
-
-            for(int i=afterTagSize; i<beforeTagSize;i++){
-                // 남은거 삭제
-                PostTag redidualPostTag = beforePostTags.get(i);
-                Tag residualTag = redidualPostTag.getTag();
-                postTagRepository.delete(redidualPostTag);
-                if(postTagRepository.countByTag(residualTag) < 1){tagRepository.delete(residualTag);}
-            }
+        List<String> newImgUrls = postReqDto.getImgUrl();
+        if(newImgUrls != null){
+            updateImage(newImgUrls, post);
         }
 
         post.update(postReqDto);
-        List<String> curTagListInDB = serviceUtil.getTagNamesFromPostTag(post);
-        PostResDto postResDto = new PostResDto(post,curTagListInDB);
+        PostResDto postResDto = new PostResDto(post, newImgUrls, newTagNames);
         GlobalResDto<PostResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.UPDATE_SUCCESS, postResDto);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
-
     }
 
     // 게시글 삭제
@@ -142,25 +119,23 @@ public class PostService {
     @Transactional(readOnly = true)
     public ResponseEntity<?> getPostDetail(Long postId){
         Post post = findPostById(postId);
-        if (null == post) {
+        if (post == null) {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
-        List<String> tagNameList = serviceUtil.getTagNamesFromPostTag(post);
+        List<String> tagNames = serviceUtil.getTagNamesFromPostTag(post);
+        List<String> imgUrls = imageRepository.findAllByPostJPQL(post);
 
-        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
-
+        List<CommentInfoDto> commentInfoDtos = new ArrayList<>();
         List<Comment> commentList = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
-
         for(Comment comment : commentList){
-            CommentInfoDto commentInfoDto = new CommentInfoDto(comment, serviceUtil.getDataFormatOfComment(comment));
-            commentInfoDtoList.add(commentInfoDto);
+            CommentInfoDto commentInfoDto = new CommentInfoDto(comment, serviceUtil.getDataFormat(comment.getCreatedAt()));
+            commentInfoDtos.add(commentInfoDto);
         }
 
-        String postDateFormat = serviceUtil.getDataFormatOfPost(post);
+        String postDateFormat = serviceUtil.getDataFormat(post.getCreatedAt());
 
-        GetPostDetailDto getPostDetailDto = new GetPostDetailDto(post, post.getMember(), tagNameList,commentInfoDtoList, postDateFormat);
-
+        GetPostDetailDto getPostDetailDto = new GetPostDetailDto(post, post.getMember(), imgUrls, tagNames, commentInfoDtos, postDateFormat);
         GlobalResDto<GetPostDetailDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getPostDetailDto);
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
@@ -168,23 +143,98 @@ public class PostService {
     // 메인 전체 게시글 목록 최신순 조회
     @Transactional(readOnly = true)
     public ResponseEntity<?> getAllPostDesc(){
-        List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
 
-        List<PostsResDto> postsResDtoList = new ArrayList<>();
+        List<PostsResDto> postsResDtos = new ArrayList<>();
 
-        for(Post post : postList){
+        for(Post post : posts){
             Long commentsNum = commentRepository.countByPost(post);
-            List<String> imgUrlList = post.getImgUrl();
-            String imgUrl = null;
-            if(!imgUrlList.isEmpty()){
-                imgUrl = imgUrlList.get(0);
-            }
-            PostsResDto postsResDto = new PostsResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormatOfPost(post));
-            postsResDtoList.add(postsResDto);
+            String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
+            PostsResDto postsResDto = new PostsResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormat(post.getCreatedAt()));
+            postsResDtos.add(postsResDto);
         }
 
-        GlobalResDto<List<PostsResDto>> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, postsResDtoList);
+        GlobalResDto<List<PostsResDto>> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, postsResDtos);
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
+    }
+
+    @Transactional
+    public void updatePostTagAndTag(List<String> newTagNames, Post post, Member member){
+        List<PostTag> oldPostTags = postTagRepository.findAllByPost(post);
+        int oldTagNum = oldPostTags.size();
+        int newTageNum = newTagNames.size();
+
+        if(oldTagNum < newTageNum){
+            exchangePostTag(oldTagNum, oldPostTags, newTagNames);
+
+            for(int i = oldTagNum; i < newTageNum; i++){
+                savePostTag(post, member, newTagNames.get(i));
+            }
+
+        } else if(oldTagNum == newTageNum){
+            exchangePostTag(oldTagNum, oldPostTags, newTagNames);
+        } else {
+            exchangePostTag(newTageNum, oldPostTags, newTagNames);
+
+            for(int i = newTageNum; i < oldTagNum; i++){
+                // 남은거 삭제
+                PostTag redidualPostTag = oldPostTags.get(i);
+                Tag residualTag = redidualPostTag.getTag();
+                postTagRepository.delete(redidualPostTag);
+                if(postTagRepository.countByTag(residualTag) < 1){tagRepository.delete(residualTag);}
+            }
+        }
+    }
+
+    @Transactional
+    public void updateImage(List<String> newImgUrls, Post post){
+        List<Image> oldImages = imageRepository.findAllByPost(post);
+        int oldImgNum = oldImages.size();
+        int newImgNum = newImgUrls.size();
+
+        if(oldImgNum < newImgNum){
+            exchangeImage(oldImgNum, oldImages, newImgUrls);
+
+            for(int i = oldImgNum; i < newImgNum; i++){
+                imageRepository.save(new Image(post, newImgUrls.get(i)));
+            }
+        } else if(oldImgNum == newImgNum){
+            exchangeImage(oldImgNum, oldImages, newImgUrls);
+        } else {
+            exchangeImage(newImgNum, oldImages, newImgUrls);
+
+            for(int i = newImgNum; i < oldImgNum; i++){
+                imageRepository.delete(oldImages.get(i));
+            }
+        }
+    }
+
+    @Transactional
+    public void exchangePostTag(int size, List<PostTag> oldPostTags, List<String> newTagNames){
+        for (int i = 0; i < size; i++){
+            String newTagName = newTagNames.get(i);
+            PostTag oldPostTag = oldPostTags.get(i);
+            Tag beforeTag = oldPostTag.getTag();
+            Tag tagInDB = tagRepository.findByTagName(newTagName);
+
+            if(tagInDB == null){
+                Tag saveTag = tagRepository.save(new Tag(newTagName));
+                oldPostTag.updateTag(saveTag);
+            } else{
+                oldPostTag.updateTag(tagInDB);
+            }
+
+            if(postTagRepository.countByTag(beforeTag) < 1){tagRepository.delete(beforeTag);}
+        }
+    }
+
+    @Transactional
+    public void exchangeImage(int size, List<Image> oldImages, List<String> newImgUrls){
+        for(int i = 0; i < size; i++){
+            String newImgUrl = newImgUrls.get(i);
+            Image oldImage = oldImages.get(i);
+            oldImage.updateImgUrl(newImgUrl);
+        }
     }
 
     @Transactional
@@ -197,25 +247,6 @@ public class PostService {
         } else {
             PostTag postTag = new PostTag(post, member, tagInDB);
             postTagRepository.save(postTag);
-        }
-    }
-
-    @Transactional
-    public void updatePostTag(int size, List<PostTag> beforePostTags, List<String> afterTags){
-        for (int i = 0; i < size; i++){
-            String newTagName = afterTags.get(i);
-            PostTag beforePostTag = beforePostTags.get(i);
-            Tag beforeTag = beforePostTag.getTag();
-            Tag tagInDB = tagRepository.findByTagName(newTagName);
-
-            if(tagInDB == null){
-                Tag saveTag = tagRepository.save(new Tag(newTagName));
-                beforePostTag.updateTag(saveTag);
-            } else{
-                beforePostTag.updateTag(tagInDB);
-            }
-
-            if(postTagRepository.countByTag(beforeTag) < 1){tagRepository.delete(beforeTag);}
         }
     }
 

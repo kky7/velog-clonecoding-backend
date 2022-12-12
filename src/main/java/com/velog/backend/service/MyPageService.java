@@ -26,6 +26,7 @@ public class MyPageService {
     private final CommentRepository commentRepository;
     private final PostTagRepository postTagRepository;
     private final LikesRepository likesRepository;
+    private final ImageRepository imageRepository;
     private final ServiceUtil serviceUtil;
 
     // 멤버별 게시물 전체 조회
@@ -58,11 +59,7 @@ public class MyPageService {
         for (Post post : postList) {
             Long commentsNum = commentRepository.countByPost(post);
 
-            List<String> imgUrlList = post.getImgUrl();
-            String imgUrl = null;
-            if (!imgUrlList.isEmpty()) {
-                imgUrl = imgUrlList.get(0);
-            }
+            String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
 
             List<PostTag> postTagList = postTagRepository.findAllByPost(post);
             List<String> tagNameList = new ArrayList<>();
@@ -73,7 +70,7 @@ public class MyPageService {
             }
 
 
-            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormatOfPost(post));
+            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormat(post.getCreatedAt()));
             myPagePostResDtoList.add(myPagePostResDto);
         }
 
@@ -105,13 +102,9 @@ public class MyPageService {
         for (Post post : postList) {
             Long commentsNum = commentRepository.countByPost(post);
 
-            List<String> imgUrlList = post.getImgUrl();
-            String imgUrl = null;
-            if (!imgUrlList.isEmpty()) {
-                imgUrl = imgUrlList.get(0);
-            }
+            String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
 
-            MyPageLikePostResDto myPageLikePostResDto = new MyPageLikePostResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormatOfPost(post));
+            MyPageLikePostResDto myPageLikePostResDto = new MyPageLikePostResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormat(post.getCreatedAt()));
             myPageLikePostResDtoList.add(myPageLikePostResDto);
         }
 

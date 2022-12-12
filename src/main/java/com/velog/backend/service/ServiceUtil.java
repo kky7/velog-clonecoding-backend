@@ -1,7 +1,6 @@
 package com.velog.backend.service;
 
 import com.velog.backend.dto.response.GlobalResDto;
-import com.velog.backend.entity.Comment;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
 import com.velog.backend.repository.PostTagRepository;
@@ -28,71 +27,35 @@ public class ServiceUtil {
         return new ResponseEntity<>(globalResDto, httpStatus);
     }
 
-    public String getDataFormatOfPost(Post post){
-        LocalDate curDateTime = LocalDate.from(LocalDateTime.now());
-        LocalDate postCreatedAt = LocalDate.from(post.getCreatedAt());
-        Period period = Period.between(postCreatedAt,curDateTime);
+    public String getDataFormat(LocalDateTime createdTime){
+        LocalDateTime curTodayTime = LocalDateTime.now();
+        LocalDate curDateTime = LocalDate.from(curTodayTime);
+        LocalDate createdDateTime = LocalDate.from(createdTime);
+        Period period = Period.between(createdDateTime, curDateTime);
         String dateFormat = "";
         int days = (period.getDays());
         if(days < 1){
-            LocalDateTime curTodayTime = LocalDateTime.now();
-            LocalDateTime createdTime = post.getCreatedAt();
-            Duration duration = Duration.between(createdTime,curTodayTime);
+            Duration duration = Duration.between(createdTime, curTodayTime);
             double time = duration.getSeconds();
-            double hour = time/3600;
+            double hour = time/DateFormatConstant.secondsDuringHour;
             if(hour < 1){
-                double minute = time/60;
+                double minute = time/DateFormatConstant.secondsDuringMinute;
                 if(minute < 1){
-                    dateFormat += "방금 전";
+                    dateFormat += DateFormatConstant.justNow;
                 }
                 else{
                     dateFormat += (int)minute;
-                    dateFormat += "분 전";
+                    dateFormat += DateFormatConstant.minute;
                 }
             }else{
                 dateFormat += (int)hour;
-                dateFormat += "시간 전";
+                dateFormat += DateFormatConstant.hour;
             }
-        }else if( days < 8){
+        }else if(days < DateFormatConstant.dayEndPoint){
             dateFormat += days;
-            dateFormat += "일 전";
+            dateFormat += DateFormatConstant.day;
         }else {
-            dateFormat += postCreatedAt;
-        }
-
-        return dateFormat;
-    }
-
-    public String getDataFormatOfComment(Comment commment){
-        LocalDate curDateTime = LocalDate.from(LocalDateTime.now());
-        LocalDate postCreatedAt = LocalDate.from(commment.getCreatedAt());
-        Period period = Period.between(postCreatedAt,curDateTime);
-        String dateFormat = "";
-        int days = (period.getDays());
-        if(days < 1){
-            LocalDateTime curTodayTime = LocalDateTime.now();
-            LocalDateTime createdTime = commment.getCreatedAt();
-            Duration duration = Duration.between(createdTime,curTodayTime);
-            double time = duration.getSeconds();
-            double hour = time/3600;
-            if(hour < 1){
-                double minute = time/60;
-                if(minute < 1){
-                    dateFormat += "방금 전";
-                }
-                else{
-                    dateFormat += (int)minute;
-                    dateFormat += "분 전";
-                }
-            }else{
-                dateFormat += (int)hour;
-                dateFormat += "시간 전";
-            }
-        }else if( days < 8){
-            dateFormat += days;
-            dateFormat += "일 전";
-        }else {
-            dateFormat += postCreatedAt;
+            dateFormat += createdDateTime;
         }
 
         return dateFormat;

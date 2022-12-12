@@ -15,12 +15,12 @@ public class PostResDto {
     private List<String> imgUrl;
     private List<String> tag;
 
-    public PostResDto(Post post, List<String> tag){
+    public PostResDto(Post post, List<String> imgUrls, List<String> tags){
         this.postId = post.getPostId();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.imgUrl = post.getImgUrl();
-        this.tag = tag;
+        this.imgUrl = imgUrls;
+        this.tag = tags;
     }
 
 }

@@ -26,6 +26,7 @@ public class TagService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
     private final CommentRepository commentRepository;
+    private final ImageRepository imageRepository;
     private final ServiceUtil serviceUtil;
 
     @Transactional(readOnly = true)
@@ -41,20 +42,20 @@ public class TagService {
             return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.TAG_NOT_FOUND);
         }
 
-        List<PostTag> postTagList = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member, tag);
+        List<PostTag> postTags = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member, tag);
 
         List<TagSearchPostDto> tagSearchPostDtos = new ArrayList<>();
-        for(PostTag postTag : postTagList){
+        for(PostTag postTag : postTags){
             Post post = postTag.getPost();
 
             List<String> tagNames = serviceUtil.getTagNamesFromPostTag(post);
-            List<String> imgUrls = post.getImgUrl();
+            List<String> imgUrls = imageRepository.findAllByPostJPQL(post);
             String imgUrl = null;
             if(!imgUrls.isEmpty()){
                 imgUrl = imgUrls.get(0);
             }
             Long commentsNum = commentRepository.countByPost(post);
-            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNames, imgUrl, commentsNum, serviceUtil.getDataFormatOfPost(post));
+            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNames, imgUrl, commentsNum, serviceUtil.getDataFormat(post.getCreatedAt()));
             tagSearchPostDtos.add(tagSearchPostDto);
         }
 

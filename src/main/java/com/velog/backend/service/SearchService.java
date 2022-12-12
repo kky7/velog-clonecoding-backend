@@ -6,6 +6,7 @@ import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
 import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.repository.CommentRepository;
+import com.velog.backend.repository.ImageRepository;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.repository.PostTagRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class SearchService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final PostTagRepository postTagRepository;
+    private final ImageRepository imageRepository;
 
     // 게시글 검색
     @Transactional
@@ -37,11 +39,7 @@ public class SearchService {
 
             Long commentsNum = commentRepository.countByPost(post);
 
-            List<String> imgUrlList = post.getImgUrl();
-            String imgUrl = null;
-            if(!imgUrlList.isEmpty()){
-                imgUrl = imgUrlList.get(0);
-            }
+            String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
 
             List<PostTag> postTagList = postTagRepository.findAllByPost(post);
             List<String> tagNameList = new ArrayList<>();
@@ -51,7 +49,7 @@ public class SearchService {
                 tagNameList.add(tagName);
             }
 
-            SearchPostResDto searchPostResDto = new SearchPostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormatOfPost(post));
+            SearchPostResDto searchPostResDto = new SearchPostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormat(post.getCreatedAt()));
             searchPostResDtoList.add(searchPostResDto);
         }
 

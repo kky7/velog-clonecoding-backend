@@ -23,18 +23,18 @@ public class GetPostDetailDto {
     private List<CommentInfoDto> commentsList;
     private String date;
 
-    public GetPostDetailDto(Post post, Member authorOfPost, List<String> tag, List<CommentInfoDto> commentsList, String dateFormat){
+    public GetPostDetailDto(Post post, Member author, List<String> imgUrls ,List<String> tags, List<CommentInfoDto> comments, String dateFormat){
         this.postId = post.getPostId();
-        this.nickname = authorOfPost.getNickname();
-        this.velogTitle = authorOfPost.getVelogTitle();
-        this.profileUrl = authorOfPost.getProfileUrl();
-        this.introduction = authorOfPost.getIntroduction();
+        this.nickname = author.getNickname();
+        this.velogTitle = author.getVelogTitle();
+        this.profileUrl = author.getProfileUrl();
+        this.introduction = author.getIntroduction();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.imgUrl = post.getImgUrl();
-        this.tag = tag;
+        this.imgUrl = imgUrls;
+        this.tag = tags;
         this.likesNum = post.getLikesNum();
-        this.commentsList = commentsList;
+        this.commentsList = comments;
         this.date = dateFormat;
     }
 }

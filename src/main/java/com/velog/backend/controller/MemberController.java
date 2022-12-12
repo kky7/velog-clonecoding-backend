@@ -1,6 +1,5 @@
 package com.velog.backend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.velog.backend.dto.request.EmailReqDto;
 import com.velog.backend.dto.request.LoginReqDto;
 import com.velog.backend.dto.request.SignupReqDto;

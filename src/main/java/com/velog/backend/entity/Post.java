@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -19,15 +18,11 @@ public class Post extends Timestamped{
     @Column(nullable = false)
     private String title;
 
-    @Column
+    @Column(length = 4000)
     private String content;
 
     @Column
     private int likesNum;
-
-    @ElementCollection
-    @CollectionTable(name="img_url")
-    private List<String> imgUrl = new ArrayList<>();
 
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,25 +34,23 @@ public class Post extends Timestamped{
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTagList;
 
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> imageList;
+
     public Post(PostReqDto postReqDto, Member member){
         this.title = postReqDto.getTitle();
         this.content = postReqDto.getContent();
-        this.imgUrl = postReqDto.getImgUrl();
         this.member = member;
     }
 
     public void update(PostReqDto postReqDto){
         String title = postReqDto.getTitle();
         String content = postReqDto.getContent();
-        List<String> imgUrl = postReqDto.getImgUrl();
         if(title != null){
             this.title = title;
         }
         if(content != null){
             this.content = content;
-        }
-        if(imgUrl != null){
-            this.imgUrl = imgUrl;
         }
     }
 
