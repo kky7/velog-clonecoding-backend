@@ -1,4 +1,4 @@
-package com.velog.backend.constant.exception;
+package com.velog.backend.constant.response;
 
 public interface SuccessMsg {
     String SIGNUP_OK = "회원가입을 진행하세요.";

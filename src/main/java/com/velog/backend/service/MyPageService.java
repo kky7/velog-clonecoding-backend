@@ -5,7 +5,7 @@ import com.velog.backend.dto.response.MyPageLikePostResDto;
 import com.velog.backend.dto.response.MyPagePostResDto;
 import com.velog.backend.dto.response.MyPageResDto;
 import com.velog.backend.entity.*;
-import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.response.ErrorMsg;
 import com.velog.backend.repository.*;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;

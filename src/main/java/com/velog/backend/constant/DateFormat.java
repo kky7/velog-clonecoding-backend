@@ -1,6 +1,6 @@
 package com.velog.backend.constant;
 
-public interface DateFormatConstant {
+public interface DateFormat {
     String justNow = "방금 전";
     String minute = "분 전";
     String hour = "시간 전";

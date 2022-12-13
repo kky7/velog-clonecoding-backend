@@ -4,7 +4,7 @@ import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.SearchPostResDto;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
-import com.velog.backend.constant.exception.SuccessMsg;
+import com.velog.backend.constant.response.SuccessMsg;
 import com.velog.backend.repository.CommentRepository;
 import com.velog.backend.repository.ImageRepository;
 import com.velog.backend.repository.PostRepository;

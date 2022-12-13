@@ -1,6 +1,7 @@
 package com.velog.backend.jwt.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.velog.backend.constant.TokenProperties;
 import com.velog.backend.repository.RefreshTokenRepository;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.entity.Member;

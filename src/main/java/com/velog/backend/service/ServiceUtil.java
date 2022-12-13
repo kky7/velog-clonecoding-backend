@@ -1,6 +1,6 @@
 package com.velog.backend.service;
 
-import com.velog.backend.constant.DateFormatConstant;
+import com.velog.backend.constant.DateFormat;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
@@ -38,23 +38,23 @@ public class ServiceUtil {
         if(days < 1){
             Duration duration = Duration.between(createdTime, curTodayTime);
             double time = duration.getSeconds();
-            double hour = time/ DateFormatConstant.secondsDuringHour;
+            double hour = time/ DateFormat.secondsDuringHour;
             if(hour < 1){
-                double minute = time/DateFormatConstant.secondsDuringMinute;
+                double minute = time/ DateFormat.secondsDuringMinute;
                 if(minute < 1){
-                    dateFormat += DateFormatConstant.justNow;
+                    dateFormat += DateFormat.justNow;
                 }
                 else{
                     dateFormat += (int)minute;
-                    dateFormat += DateFormatConstant.minute;
+                    dateFormat += DateFormat.minute;
                 }
             }else{
                 dateFormat += (int)hour;
-                dateFormat += DateFormatConstant.hour;
+                dateFormat += DateFormat.hour;
             }
-        }else if(days < DateFormatConstant.dayEndPoint){
+        }else if(days < DateFormat.dayEndPoint){
             dateFormat += days;
-            dateFormat += DateFormatConstant.day;
+            dateFormat += DateFormat.day;
         }else {
             dateFormat += createdDateTime;
         }

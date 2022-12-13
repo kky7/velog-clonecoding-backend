@@ -1,6 +1,6 @@
 package com.velog.backend.controller;
 
-import com.velog.backend.constant.exception.SuccessMsg;
+import com.velog.backend.constant.response.SuccessMsg;
 import com.velog.backend.dto.request.PostReqDto;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.image.S3ImageUploader;

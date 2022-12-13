@@ -7,7 +7,7 @@ import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
 import com.velog.backend.entity.Tag;
-import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.response.ErrorMsg;
 import com.velog.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -2,7 +2,7 @@ package com.velog.backend.security.configuration;
 
 import com.velog.backend.jwt.filter.JwtAuthFilter;
 import com.velog.backend.jwt.util.JwtUtil;
-import com.velog.backend.jwt.util.TokenProperties;
+import com.velog.backend.constant.TokenProperties;
 import com.velog.backend.security.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,8 +1,8 @@
 package com.velog.backend.jwt.filter;
 
-import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.response.ErrorMsg;
 import com.velog.backend.jwt.util.JwtUtil;
-import com.velog.backend.jwt.util.TokenProperties;
+import com.velog.backend.constant.TokenProperties;
 import com.velog.backend.security.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

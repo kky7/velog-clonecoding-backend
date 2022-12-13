@@ -10,10 +10,10 @@ import com.velog.backend.dto.response.ProfileInfoDto;
 import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.RefreshToken;
-import com.velog.backend.constant.exception.ErrorMsg;
-import com.velog.backend.constant.exception.SuccessMsg;
+import com.velog.backend.constant.response.ErrorMsg;
+import com.velog.backend.constant.response.SuccessMsg;
 import com.velog.backend.jwt.util.JwtUtil;
-import com.velog.backend.jwt.util.TokenProperties;
+import com.velog.backend.constant.TokenProperties;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -92,29 +92,24 @@ public class MemberService {
         }
 
         String nickname = member.getNickname();
-
         // 토큰 발급
         String accessToken = jwtUtil.createToken(nickname, TokenProperties.AUTH_HEADER);
         String refreshToken = jwtUtil.createToken(nickname, TokenProperties.REFRESH_HEADER);
 
-        RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
-
+        RefreshToken refreshTokenInDB = jwtUtil.getRefreshTokenFromDB(member);
         // 로그인 경력이 있는 사용자 -> DB에 Refresh Token 있음 -> 새로 로그인 했으면 새로 발급받는 토큰으로 변경
         // 로그인이 처음인 사용자 -> DB에 Refresh Token 없음 -> 발급받은 Refresh 토큰 저장
-        if(refreshTokenFromDB == null){
+        if(refreshTokenInDB == null){
             RefreshToken saveRefreshToken = new RefreshToken(member, refreshToken);
             refreshTokenRepository.save(saveRefreshToken);
         } else{
-            refreshTokenFromDB.updateValue(refreshToken);
+            refreshTokenInDB.updateValue(refreshToken);
         }
         
         // 응답 헤더에 토큰 담아서 보내기
         TokenToHeaders(response, accessToken, refreshToken);
-
         MemberInfoResDto memberInfoResDto = new MemberInfoResDto(member);
-
         GlobalResDto<MemberInfoResDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.LOGIN_SUCCESS, memberInfoResDto);
-
         return new ResponseEntity<>(globalResDto, HttpStatus.OK);
     }
 
@@ -134,11 +129,8 @@ public class MemberService {
         }
 
         String refreshToken = refreshHeader.replace(TokenProperties.TOKEN_TYPE,"");
-
         // 토큰 검증
         String refreshTokenValidate = jwtUtil.validateToken(refreshToken);
-
-
         switch (refreshTokenValidate) {
             case TokenProperties.VALID:
             case TokenProperties.EXPIRED:
@@ -170,7 +162,6 @@ public class MemberService {
 
         // Refresh 토큰 검증
         String refreshTokenValidate = jwtUtil.validateToken(refreshToken);
-
         switch (refreshTokenValidate) {
             case TokenProperties.EXPIRED:
                 return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.EXPIRED_REFRESH_TOKEN);
@@ -198,7 +189,6 @@ public class MemberService {
     @Transactional
     public ResponseEntity<?> getProfileInfo(UserDetailsImpl userDetails){
         Member member = userDetails.getMember();
-
         GlobalResDto<ProfileInfoDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.PROFILE_SUCCESS, new ProfileInfoDto(member));
         return new ResponseEntity<>(globalResDto,HttpStatus.OK);
     }
@@ -217,19 +207,16 @@ public class MemberService {
 
     private boolean isEmailDuplicate(String email){
         Member member = findMemberByEmail(email);
-
         return member != null;
     }
 
     private boolean emailFormatChek(String email){
         String email_regex = "^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$";
-
         return email.matches(email_regex) && email.endsWith(".com");
     }
 
     private boolean isNicknameDuplicate(String nickname){
         Member member = findMemberByNickname(nickname);
-
         return member != null;
     }
 
