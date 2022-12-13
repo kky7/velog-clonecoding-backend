@@ -4,8 +4,8 @@ import com.velog.backend.dto.response.LikesResDto;
 import com.velog.backend.entity.Likes;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
-import com.velog.backend.exception.ErrorMsg;
-import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.repository.LikesRepository;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.security.user.UserDetailsImpl;
@@ -23,19 +23,17 @@ public class LikesService {
 
     private final LikesRepository likesRepository;
     private final PostRepository postRepository;
-    private final ServiceUtil serviceUtil;
-
 
     @Transactional
     public ResponseEntity<?> getLikes(LikesResDto likesResDto, UserDetailsImpl userDetails) {
 
         Member member = userDetails.getMember();
         if (null == member) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
         }
         Post post = getPost(likesResDto);
         if (null == post) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Likes checkLikes = likesRepository.findByMemberAndPost(member, post);
@@ -44,12 +42,12 @@ public class LikesService {
             Likes likes = new Likes(member, post);
             likesRepository.save(likes);
             post.like();
-            return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_SUCCESS);
+            return ServiceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_SUCCESS);
         }
 
         likesRepository.deleteById(checkLikes.getLikeId());
         post.unlike();
-        return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
+        return ServiceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LIKE_CANCEL);
 
     }
 

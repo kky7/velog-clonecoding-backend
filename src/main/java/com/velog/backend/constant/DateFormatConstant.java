@@ -1,4 +1,4 @@
-package com.velog.backend.service;
+package com.velog.backend.constant;
 
 public interface DateFormatConstant {
     String justNow = "방금 전";

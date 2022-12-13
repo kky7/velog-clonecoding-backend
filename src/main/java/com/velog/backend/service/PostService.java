@@ -3,8 +3,8 @@ package com.velog.backend.service;
 import com.velog.backend.dto.request.PostReqDto;
 import com.velog.backend.dto.response.*;
 import com.velog.backend.entity.*;
-import com.velog.backend.exception.ErrorMsg;
-import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.repository.*;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.AllArgsConstructor;
@@ -60,12 +60,12 @@ public class PostService {
 
         Post post = findPostById(postId);
         if (post == null) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Member member = userDetails.getMember();
         if(post.validateMember(member.getMemberId())) {
-            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         List<String> newTagNames = postReqDto.getTag();
@@ -89,13 +89,13 @@ public class PostService {
     public ResponseEntity<?> deletePost(Long postId, UserDetailsImpl userDetails){
         Post post = findPostById(postId);
         if (post == null) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Member member = userDetails.getMember();
 
         if(post.validateMember(member.getMemberId())) {
-            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         List<PostTag> postTags = postTagRepository.findAllByPost(post);
@@ -112,7 +112,7 @@ public class PostService {
             if(postTagRepository.countByTag(tag) < 1){tagRepository.delete(tag);}
         }
 
-        return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
+        return ServiceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.DELETE_SUCCESS);
     }
 
     // 게시글 상세 조회
@@ -120,7 +120,7 @@ public class PostService {
     public ResponseEntity<?> getPostDetail(Long postId){
         Post post = findPostById(postId);
         if (post == null) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         List<String> tagNames = serviceUtil.getTagNamesFromPostTag(post);
@@ -129,11 +129,11 @@ public class PostService {
         List<CommentInfoDto> commentInfoDtos = new ArrayList<>();
         List<Comment> commentList = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
         for(Comment comment : commentList){
-            CommentInfoDto commentInfoDto = new CommentInfoDto(comment, serviceUtil.getDataFormat(comment.getCreatedAt()));
+            CommentInfoDto commentInfoDto = new CommentInfoDto(comment, ServiceUtil.getDataFormat(comment.getCreatedAt()));
             commentInfoDtos.add(commentInfoDto);
         }
 
-        String postDateFormat = serviceUtil.getDataFormat(post.getCreatedAt());
+        String postDateFormat = ServiceUtil.getDataFormat(post.getCreatedAt());
 
         GetPostDetailDto getPostDetailDto = new GetPostDetailDto(post, post.getMember(), imgUrls, tagNames, commentInfoDtos, postDateFormat);
         GlobalResDto<GetPostDetailDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, null, getPostDetailDto);
@@ -150,7 +150,7 @@ public class PostService {
         for(Post post : posts){
             Long commentsNum = commentRepository.countByPost(post);
             String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
-            PostsResDto postsResDto = new PostsResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormat(post.getCreatedAt()));
+            PostsResDto postsResDto = new PostsResDto(post, commentsNum, imgUrl, ServiceUtil.getDataFormat(post.getCreatedAt()));
             postsResDtos.add(postsResDto);
         }
 

@@ -10,8 +10,8 @@ import com.velog.backend.dto.response.ProfileInfoDto;
 import com.velog.backend.dto.response.MemberInfoResDto;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.RefreshToken;
-import com.velog.backend.exception.ErrorMsg;
-import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.jwt.util.JwtUtil;
 import com.velog.backend.jwt.util.TokenProperties;
 import com.velog.backend.security.user.UserDetailsImpl;
@@ -35,17 +35,16 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final ServiceUtil serviceUtil;
 
     // 이메일 중복체크
     public ResponseEntity<?> emailCheck(EmailReqDto emailReqDto){
         String email = emailReqDto.getEmail();
 
         if(! emailFormatChek(email)) {
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_EMAIL);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_EMAIL);
         }
         else if(isEmailDuplicate(email)) {
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_EMAIL);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_EMAIL);
         }
         else{
             GlobalResDto<EmailReqDto> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.SIGNUP_OK, emailReqDto);
@@ -61,9 +60,9 @@ public class MemberService {
         String nickname = signupReqDto.getNickname();
 
         if(isNicknameDuplicate(nickname)){
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_NICKNAME);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.DUPLICATE_NICKNAME);
         } else if (!isSamePassword(password, passwordConfirm)){
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.PASSWORD_NOT_MATCHED);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.PASSWORD_NOT_MATCHED);
         } else {
             signupReqDto.setPassword(passwordEncoder.encode(password));
 
@@ -84,12 +83,12 @@ public class MemberService {
         Member member = findMemberByEmail(email);
 
         if(member == null){
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.EMAIL_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.EMAIL_NOT_FOUND);
         }
 
 
         if(!member.validatePassword(passwordEncoder, loginReqDto.getPassword())){
-            return serviceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_PASSWORD);
+            return ServiceUtil.dataNullResponse(HttpStatus.BAD_REQUEST, ErrorMsg.INVALID_PASSWORD);
         }
 
         String nickname = member.getNickname();
@@ -127,11 +126,11 @@ public class MemberService {
         String refreshHeader = request.getHeader(TokenProperties.REFRESH_HEADER);
 
         if(refreshHeader == null){
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_REFRESH_TOKEN);
+            return ServiceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_REFRESH_TOKEN);
         }
 
         if(!refreshHeader.startsWith(TokenProperties.TOKEN_TYPE)){
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_REFRESH_TOKEN);
+            return ServiceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
 
         String refreshToken = refreshHeader.replace(TokenProperties.TOKEN_TYPE,"");
@@ -146,12 +145,12 @@ public class MemberService {
                 RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
                 if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
                     refreshTokenRepository.delete(refreshTokenFromDB);
-                    return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LOGOUT_SUCCESS);
+                    return ServiceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.LOGOUT_SUCCESS);
                 } else {
-                    return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
+                    return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
                 }
             default:
-                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
+                return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -160,11 +159,11 @@ public class MemberService {
         String refreshHeader = request.getHeader(TokenProperties.REFRESH_HEADER);
 
         if(refreshHeader == null){
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_REFRESH_TOKEN);
+            return ServiceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.NEED_REFRESH_TOKEN);
         }
 
         if(!refreshHeader.startsWith(TokenProperties.TOKEN_TYPE)){
-            return serviceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_REFRESH_TOKEN);
+            return ServiceUtil.dataNullResponse(HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
 
         String refreshToken = refreshHeader.replace(TokenProperties.TOKEN_TYPE, "");
@@ -174,25 +173,25 @@ public class MemberService {
 
         switch (refreshTokenValidate) {
             case TokenProperties.EXPIRED:
-                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.EXPIRED_REFRESH_TOKEN);
+                return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.EXPIRED_REFRESH_TOKEN);
             case TokenProperties.VALID:
                 String nickname = jwtUtil.getNicknameFromToken(refreshToken);
                 Member member = findMemberByEmail(nickname);
 
                 if (member == null) {
-                    return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_FOUND);
+                    return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_FOUND);
                 } else {
                     RefreshToken refreshTokenFromDB = jwtUtil.getRefreshTokenFromDB(member);
                     if (refreshTokenFromDB != null && refreshToken.equals(refreshTokenFromDB.getTokenValue())) {
                         String newAccessToken = jwtUtil.createToken(member.getNickname(), TokenProperties.AUTH_HEADER);
                         response.addHeader(TokenProperties.AUTH_HEADER, TokenProperties.TOKEN_TYPE + newAccessToken);
-                        return serviceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.REISSUE_ACCESS_TOKEN);
+                        return ServiceUtil.dataNullResponse(HttpStatus.OK, SuccessMsg.REISSUE_ACCESS_TOKEN);
                     } else {
-                        return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
+                        return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.REFRESH_TOKEN_NOT_MATCHED);
                     }
                 }
             default:
-                return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
+                return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.INVALID_REFRESH_TOKEN);
         }
     }
 

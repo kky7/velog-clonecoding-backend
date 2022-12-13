@@ -1,4 +1,4 @@
-package com.velog.backend.exception;
+package com.velog.backend.constant.exception;
 
 public interface ErrorMsg {
     // 회원가입

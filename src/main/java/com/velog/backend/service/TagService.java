@@ -7,7 +7,7 @@ import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
 import com.velog.backend.entity.Tag;
-import com.velog.backend.exception.ErrorMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
 import com.velog.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,13 +33,13 @@ public class TagService {
     public ResponseEntity<?> tagSearch(String nickname, String searchTagName){
         Member member = memberRepository.findByNickname(nickname).orElse(null);
         if (member == null){
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.BLOG_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.BLOG_NOT_FOUND);
         }
 
         Tag tag = tagRepository.findByTagName(searchTagName);
 
         if(tag == null){
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.TAG_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.TAG_NOT_FOUND);
         }
 
         List<PostTag> postTags = postTagRepository.findAllByMemberAndTagOrderByPostDesc(member, tag);
@@ -55,7 +55,7 @@ public class TagService {
                 imgUrl = imgUrls.get(0);
             }
             Long commentsNum = commentRepository.countByPost(post);
-            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNames, imgUrl, commentsNum, serviceUtil.getDataFormat(post.getCreatedAt()));
+            TagSearchPostDto tagSearchPostDto = new TagSearchPostDto(post, tagNames, imgUrl, commentsNum, ServiceUtil.getDataFormat(post.getCreatedAt()));
             tagSearchPostDtos.add(tagSearchPostDto);
         }
 

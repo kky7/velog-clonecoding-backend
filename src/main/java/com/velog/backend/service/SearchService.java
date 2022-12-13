@@ -4,7 +4,7 @@ import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.dto.response.SearchPostResDto;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
-import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.repository.CommentRepository;
 import com.velog.backend.repository.ImageRepository;
 import com.velog.backend.repository.PostRepository;
@@ -23,7 +23,6 @@ import java.util.List;
 @Service
 public class SearchService {
 
-    private final ServiceUtil serviceUtil;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final PostTagRepository postTagRepository;
@@ -49,7 +48,7 @@ public class SearchService {
                 tagNameList.add(tagName);
             }
 
-            SearchPostResDto searchPostResDto = new SearchPostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormat(post.getCreatedAt()));
+            SearchPostResDto searchPostResDto = new SearchPostResDto(post, commentsNum, imgUrl, tagNameList, ServiceUtil.getDataFormat(post.getCreatedAt()));
             searchPostResDtoList.add(searchPostResDto);
         }
 

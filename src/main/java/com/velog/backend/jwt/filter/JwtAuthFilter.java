@@ -1,6 +1,6 @@
 package com.velog.backend.jwt.filter;
 
-import com.velog.backend.exception.ErrorMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
 import com.velog.backend.jwt.util.JwtUtil;
 import com.velog.backend.jwt.util.TokenProperties;
 import com.velog.backend.security.user.UserDetailsServiceImpl;

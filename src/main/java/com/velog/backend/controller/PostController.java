@@ -1,8 +1,8 @@
 package com.velog.backend.controller;
 
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.dto.request.PostReqDto;
 import com.velog.backend.dto.response.GlobalResDto;
-import com.velog.backend.exception.SuccessMsg;
 import com.velog.backend.image.S3ImageUploader;
 import com.velog.backend.security.user.UserDetailsImpl;
 import com.velog.backend.service.PostService;
@@ -43,7 +43,7 @@ public class PostController {
 
     // 이미지 URL 변환
     @PostMapping("/auth/post/img")
-    public ResponseEntity<?> uploadImage(@RequestParam(value = "image", required = false) MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<?> uploadImage(@RequestParam(value = "image", required = false) MultipartFile multipartFile) throws IOException, IOException {
         String imgUrl = null;
         if (!multipartFile.isEmpty()) {imgUrl = s3ImageUploader.uploadImage(multipartFile, "post");}
         GlobalResDto<?> globalResDto = new GlobalResDto<>(HttpStatus.OK, SuccessMsg.TRANSFORM_SUCCESS, imgUrl);

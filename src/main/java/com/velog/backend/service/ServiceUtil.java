@@ -1,5 +1,6 @@
 package com.velog.backend.service;
 
+import com.velog.backend.constant.DateFormatConstant;
 import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.entity.Post;
 import com.velog.backend.entity.PostTag;
@@ -22,12 +23,12 @@ public class ServiceUtil {
 
     private final PostTagRepository postTagRepository;
 
-    public ResponseEntity<?> dataNullResponse(HttpStatus httpStatus, String msg){
+    public static ResponseEntity<?> dataNullResponse(HttpStatus httpStatus, String msg){
         GlobalResDto<String> globalResDto = new GlobalResDto<>(httpStatus, msg);
         return new ResponseEntity<>(globalResDto, httpStatus);
     }
 
-    public String getDataFormat(LocalDateTime createdTime){
+    public static String getDataFormat(LocalDateTime createdTime){
         LocalDateTime curTodayTime = LocalDateTime.now();
         LocalDate curDateTime = LocalDate.from(curTodayTime);
         LocalDate createdDateTime = LocalDate.from(createdTime);
@@ -37,7 +38,7 @@ public class ServiceUtil {
         if(days < 1){
             Duration duration = Duration.between(createdTime, curTodayTime);
             double time = duration.getSeconds();
-            double hour = time/DateFormatConstant.secondsDuringHour;
+            double hour = time/ DateFormatConstant.secondsDuringHour;
             if(hour < 1){
                 double minute = time/DateFormatConstant.secondsDuringMinute;
                 if(minute < 1){

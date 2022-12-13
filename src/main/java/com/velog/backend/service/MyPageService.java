@@ -5,7 +5,7 @@ import com.velog.backend.dto.response.MyPageLikePostResDto;
 import com.velog.backend.dto.response.MyPagePostResDto;
 import com.velog.backend.dto.response.MyPageResDto;
 import com.velog.backend.entity.*;
-import com.velog.backend.exception.ErrorMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
 import com.velog.backend.repository.*;
 import com.velog.backend.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,6 @@ public class MyPageService {
     private final PostTagRepository postTagRepository;
     private final LikesRepository likesRepository;
     private final ImageRepository imageRepository;
-    private final ServiceUtil serviceUtil;
 
     // 멤버별 게시물 전체 조회
     @Transactional
@@ -36,7 +35,7 @@ public class MyPageService {
         Member member = memberRepository.findAllByNickname(nickname);
 
         if (null == member) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.MEMBER_NOT_FOUND);
         }
 
         List<PostTag> postTagListByMember = postTagRepository.findAllByMember(member);
@@ -70,7 +69,7 @@ public class MyPageService {
             }
 
 
-            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, commentsNum, imgUrl, tagNameList, serviceUtil.getDataFormat(post.getCreatedAt()));
+            MyPagePostResDto myPagePostResDto = new MyPagePostResDto(post, commentsNum, imgUrl, tagNameList, ServiceUtil.getDataFormat(post.getCreatedAt()));
             myPagePostResDtoList.add(myPagePostResDto);
         }
 
@@ -92,7 +91,7 @@ public class MyPageService {
         List<Likes> myLikeList = likesRepository.findAllByMember_MemberId(memberId);
 
         if (null == myLikeList) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         for (Likes likes : myLikeList) {
@@ -104,7 +103,7 @@ public class MyPageService {
 
             String imgUrl = imageRepository.findAllByPost_PostId(post.getPostId());
 
-            MyPageLikePostResDto myPageLikePostResDto = new MyPageLikePostResDto(post, commentsNum, imgUrl, serviceUtil.getDataFormat(post.getCreatedAt()));
+            MyPageLikePostResDto myPageLikePostResDto = new MyPageLikePostResDto(post, commentsNum, imgUrl, ServiceUtil.getDataFormat(post.getCreatedAt()));
             myPageLikePostResDtoList.add(myPageLikePostResDto);
         }
 

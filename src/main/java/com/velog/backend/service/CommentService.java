@@ -6,8 +6,8 @@ import com.velog.backend.dto.response.GlobalResDto;
 import com.velog.backend.entity.Comment;
 import com.velog.backend.entity.Member;
 import com.velog.backend.entity.Post;
-import com.velog.backend.exception.ErrorMsg;
-import com.velog.backend.exception.SuccessMsg;
+import com.velog.backend.constant.exception.ErrorMsg;
+import com.velog.backend.constant.exception.SuccessMsg;
 import com.velog.backend.repository.CommentRepository;
 import com.velog.backend.repository.PostRepository;
 import com.velog.backend.security.user.UserDetailsImpl;
@@ -25,7 +25,6 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final ServiceUtil serviceUtil;
 
     // 댓글 생성
     @Transactional
@@ -34,7 +33,7 @@ public class CommentService {
         Member member = userDetails.getMember();
         Post post = isPresentPost(requestDto.getPostId());
         if (null == post) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.POST_NOT_FOUND);
         }
 
         Comment comment = new Comment(post, member, requestDto);
@@ -52,13 +51,13 @@ public class CommentService {
 
         Comment comment = isPresentComment(commentId);
         if (null == comment ) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
         }
 
         Member member = comment.getMember();
         Long memberId = member.getMemberId();
         if (!memberId.equals(userDetails.getMember().getMemberId())) {
-            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         comment.update(requestDto);
@@ -75,13 +74,13 @@ public class CommentService {
 
         Comment comment = isPresentComment(commentId);
         if (null == comment ) {
-            return serviceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
+            return ServiceUtil.dataNullResponse(HttpStatus.NOT_FOUND, ErrorMsg.COMMENT_NOT_FOUND);
         }
 
         Member member = comment.getMember();
         Long memberId = member.getMemberId();
         if (!memberId.equals(userDetails.getMember().getMemberId())) {
-            return serviceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
+            return ServiceUtil.dataNullResponse(HttpStatus.FORBIDDEN, ErrorMsg.MEMBER_NOT_MATCHED);
         }
 
         commentRepository.delete(comment);
